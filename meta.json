@@ -1,0 +1,50 @@
+{
+    "classes": [
+        {
+            "title": "healthy lung",
+            "shape": "bitmap",
+            "color": "#7ED321",
+            "geometry_config": {},
+            "id": 33120,
+            "hotkey": ""
+        },
+        {
+            "title": "tuberculosis lung",
+            "shape": "bitmap",
+            "color": "#D0021B",
+            "geometry_config": {},
+            "id": 33121,
+            "hotkey": ""
+        }
+    ],
+    "tags": [
+        {
+            "name": "info",
+            "value_type": "any_string",
+            "color": "#4D8A0F",
+            "id": 6611,
+            "hotkey": "",
+            "applicable_type": "all",
+            "classes": []
+        },
+        {
+            "name": "Montgomery County",
+            "value_type": "none",
+            "color": "#320F8A",
+            "id": 6612,
+            "hotkey": "",
+            "applicable_type": "all",
+            "classes": []
+        },
+        {
+            "name": "Shenzhen",
+            "value_type": "none",
+            "color": "#140F8A",
+            "id": 6613,
+            "hotkey": "",
+            "applicable_type": "all",
+            "classes": []
+        }
+    ],
+    "projectType": "images"
+}
