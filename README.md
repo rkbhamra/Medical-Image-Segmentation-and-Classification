@@ -1,5 +1,3 @@
-# Medical-Image-Segmentation-and-Classification
+# Chest Xray Masks and Labels
 
-Leo is Cheng
-
-https://developer.supervisely.com/getting-started/python-sdk-tutorials/common/iterate-over-a-local-project
+Chest Xray Masks and Labels is a dataset for instance segmentation, semantic segmentation, and object detection tasks.
