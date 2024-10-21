@@ -32,27 +32,24 @@ class ImageUploadWindow(QMainWindow):
         # titleTextHolder.setGeometry(0, 10, winWidth, 50)
 
         titleText = q.QLabel("Tuberculosis Detection Algorithm using X-Ray", self)
-        # titleTextHolder.setStyleSheet("""
-        #     QLabel {
-        #         font-size: 18pt;
-        #         align-self: center;
-        #         align-content: center;
-        #         align-items: center;
-        #     }
-        #     """)
+        titleText.setStyleSheet("""
+            QLabel {
+                font-size: 18pt;
+            }
+            """)
         titleText.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
-        titleText.setGeometry(0, 10, winWidth, 50)
+        titleText.setGeometry(0, 5, winWidth, 50)
 
         self.imageInputBlock = q.QLabel(self)
-        self.imageInputBlock.setGeometry(50, 100, imgWidth, imgHeight)
+        self.imageInputBlock.setGeometry(50, 60, imgWidth, imgHeight)
         
         self.imageOutputBlock = q.QLabel(self)
-        self.imageOutputBlock.setGeometry(50, 400, imgWidth, imgHeight)
+        self.imageOutputBlock.setGeometry(50, 380, imgWidth, imgHeight)
 
         # self.imagePlaceHolderTop = q.QLabel("No Image Loaded Yet", self)
         # self.imagePlaceHolderTop.mouseReleaseEvent=self.importImage
         self.imagePlaceHolderTop = q.QPushButton("No Image Loaded Yet", self)
-        self.imagePlaceHolderTop.setGeometry(50, 100, imgWidth, imgHeight)
+        self.imagePlaceHolderTop.setGeometry(50, 60, imgWidth, imgHeight)
         # self.imagePlaceHolderTop.setObjectName("imgTop")
         # self.imagePlaceHolderTop.setStyleSheet("""
         #     QPushButton::before { 
@@ -80,7 +77,7 @@ class ImageUploadWindow(QMainWindow):
         # test.clicked(self.importImage)
         
         self.imagePlaceHolderBot = q.QPushButton("No Image Loaded Yet", self)
-        self.imagePlaceHolderBot.setGeometry(50, 400, imgWidth, imgHeight)
+        self.imagePlaceHolderBot.setGeometry(50, 380, imgWidth, imgHeight)
         # self.imagePlaceHolderBot.setDefault(False)
 
         aaa = self.imagePlaceHolderTop.focusWidget()
