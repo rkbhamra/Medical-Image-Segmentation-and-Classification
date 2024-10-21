@@ -1,6 +1,7 @@
 import numpy as np
 import cv2, zlib, base64, io
 from PIL import Image
+import glob
 
 def base64_2_mask(s):
     z = zlib.decompress(base64.b64decode(s))
@@ -15,3 +16,9 @@ def mask_2_base64(mask):
     img_pil.save(bytes_io, format='PNG', transparency=0, optimize=0)
     bytes = bytes_io.getvalue()
     return base64.b64encode(zlib.compress(bytes)).decode('utf-8')
+
+def get_images(folder):
+    map(Image.open, glob(f'{folder}/img/*.png'))
+    # zip image (nparray) and output (0/1) later
+
+
