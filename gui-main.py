@@ -51,38 +51,17 @@ class ImageUploadWindow(QMainWindow):
         self.imagePlaceHolderTop = q.QPushButton("No Image Loaded Yet", self)
         self.imagePlaceHolderTop.setGeometry(50, 60, imgWidth, imgHeight)
         # self.imagePlaceHolderTop.setObjectName("imgTop")
-        # self.imagePlaceHolderTop.setStyleSheet("""
-        #     QPushButton::before { 
-        #         content: "No Image Yet"; 
-        #     }
-        #     QPushButton:hover::before {
-        #         content: "Click to Load Image" !important; 
-        #     }
-        #     QPushButton:hover {
-        #         border-radius: 2pt;
-        #         background-color: #882288;
-        #     }
-        #     """)
-        # self.imagePlaceHolderTop.setFocusPolicy()
-        # self.imagePlaceHolderTop.setEnabled(False)
-        # self.imagePlaceHolderTop.setFlat(False)
-        # self.imagePlaceHolderTop.setWindowOpacity(0.5)
-        test = q.QLabel("CLICK", self)
-        test.setGeometry(500, 50, 100, 100)
-        test.setStyleSheet("""
-            QWidget { background-color: blue; }
-            QWidget:hover { background-color: red; }
-            """)
-        # test.mouseReleaseEvent=self.importImage
-        # test.clicked(self.importImage)
-        
         self.imagePlaceHolderBot = q.QPushButton("No Image Loaded Yet", self)
         self.imagePlaceHolderBot.setGeometry(50, 380, imgWidth, imgHeight)
-        # self.imagePlaceHolderBot.setDefault(False)
 
         aaa = self.imagePlaceHolderTop.focusWidget()
         print(aaa)
         # print(self.imagePlaceHolderTop.styleSheet())
+
+        processButton = q.QPushButton("Go", self)
+        processButton.setGeometry(260, 340, 60, 30)
+        processButton.clicked.connect(self.processImage)
+        processButton.setToolTip("Run algorithm to check for tuberculosis\nNOTE: RIGHT NOW THIS SIMPLY PUTS THE OTHER IMAGE")
 
 
 
@@ -118,6 +97,7 @@ class ImageUploadWindow(QMainWindow):
             imageInput = QPixmap()
             imageInput.load(fname[0])
             self.imageInputBlock.setPixmap(imageInput.scaled(self.imageInputBlock.size()))#, qtc.Qt.AspectRatioMode.IgnoreAspectRatio))
+            self.imageInputBlock.setObjectName(fname[0])
             # self.imageInputBlock.resize(imageInput.width(), imageInput.height())
             # self.imagePlaceHolderTop.setFlat(True)
             self.imagePlaceHolderTop.setText("Click to Replace Image")
@@ -143,17 +123,17 @@ class ImageUploadWindow(QMainWindow):
             # print(self.imagePlaceHolderTop.styleSheet())
         return
     
-    def exportImage(self):
-        fname = q.QFileDialog.getOpenFileName(
-            self,
-            "Open File",
-            "./Images",
-            "PNG Files (*.png);; All Files (*)",
-        )
-        print(fname)
-        if(fname[0] != ''):
+    def exportImage(self, filename):
+        # fname = q.QFileDialog.getOpenFileName(
+        #     self,
+        #     "Open File",
+        #     "./Images",
+        #     "PNG Files (*.png);; All Files (*)",
+        # )
+        print(filename)
+        if(filename != ''):
             imageInput = QPixmap()
-            imageInput.load(fname[0])
+            imageInput.load(filename)
             self.imageOutputBlock.setPixmap(imageInput.scaled(self.imageOutputBlock.size()))#, qtc.Qt.AspectRatioMode.IgnoreAspectRatio))
             # self.imageOutputBlock.resize(imageInput.width(), imageInput.height())
             self.imagePlaceHolderBot.setText("Click to Replace Image")
@@ -176,8 +156,17 @@ class ImageUploadWindow(QMainWindow):
             """)
         return
     
-    # def eventFilter(self, a0, a1):
-    #     return super().eventFilter(a0, a1)
+    def processImage(self):
+        currentImage = self.imageInputBlock.objectName()
+        print(currentImage)
+        if currentImage == "":
+            return
+        else:
+            if currentImage[-5] == '2':
+                self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/Images/sample_image.png")
+            else:
+                self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/Images/sample_image_2.png")
+        return
         
 
 
