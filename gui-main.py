@@ -4,6 +4,7 @@ import PyQt6.QtWidgets as q
 from PyQt6.QtGui import QPixmap, QPicture
 from PyQt6.QtWidgets import QApplication, QMainWindow
 import PyQt6.QtCore as qtc
+import PyQt6.QtMultimediaWidgets as qtg
 
 
 winWidth = 580
@@ -46,17 +47,13 @@ class ImageUploadWindow(QMainWindow):
         self.imageOutputBlock = q.QLabel(self)
         self.imageOutputBlock.setGeometry(50, 380, imgWidth, imgHeight)
 
-        # self.imagePlaceHolderTop = q.QLabel("No Image Loaded Yet", self)
-        # self.imagePlaceHolderTop.mouseReleaseEvent=self.importImage
         self.imagePlaceHolderTop = q.QPushButton("No Image Loaded Yet", self)
         self.imagePlaceHolderTop.setGeometry(50, 60, imgWidth, imgHeight)
-        # self.imagePlaceHolderTop.setObjectName("imgTop")
+        self.imagePlaceHolderTop.clicked.connect(self.importImage)
+
         self.imagePlaceHolderBot = q.QPushButton("No Image Loaded Yet", self)
         self.imagePlaceHolderBot.setGeometry(50, 380, imgWidth, imgHeight)
-
-        aaa = self.imagePlaceHolderTop.focusWidget()
-        print(aaa)
-        # print(self.imagePlaceHolderTop.styleSheet())
+        self.imagePlaceHolderBot.clicked.connect(self.saveImage)
 
         processButton = q.QPushButton("Go", self)
         processButton.setGeometry(260, 340, 60, 30)
@@ -64,30 +61,12 @@ class ImageUploadWindow(QMainWindow):
         processButton.setToolTip("Run algorithm to check for tuberculosis\nNOTE: RIGHT NOW THIS SIMPLY PUTS THE OTHER IMAGE")
 
 
-
-        
-        # addImageButton = q.QPushButton("Import Image", self)
-        # addImageButton.setGeometry(700, 100, butWidth, butHeight)
-        # addImageButton.clicked.connect(self.importImage)
-        # addImageButton2 = q.QPushButton("Export Image", self)
-        # addImageButton2.setGeometry(700, 150, butWidth, butHeight)
-        # addImageButton2.clicked.connect(self.exportImage)
-
-        # layout.addWidget(self.imageInputBlock, 0, 0)
-        # layout.addWidget(self.imageOutputBlock, 1, 0)
-        # layout.addWidget(addImageButton, 1, 0)
-        # cw.setLayout(layout)
-        # addImageButton.click(self.importImage)
-        # self.resize(imageInput.width(), imageInput.height())
-        self.imagePlaceHolderTop.clicked.connect(self.importImage)
-        self.imagePlaceHolderBot.clicked.connect(self.exportImage)
-
     
-    def importImage(self, event):
+    def importImage(self):
         fname = q.QFileDialog.getOpenFileName(
             self,
             "Open File",
-            "./Images",
+            "./InputImages",
             "PNG Files (*.png);; All Files (*)",
         )
         print(fname)
@@ -123,6 +102,22 @@ class ImageUploadWindow(QMainWindow):
             # print(self.imagePlaceHolderTop.styleSheet())
         return
     
+    def saveImage(self):
+        fname = q.QFileDialog.getSaveFileName(
+            self,
+            "Save File",
+            "./OutputImages",
+            "PNG Files (*.png);; All Files (*)",
+        )
+        # fname = "C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/OutputImages/test1.png"
+        if fname[0]:
+            # with open(fname, 'w') as f:
+            #     f.write(self.imageOutputBlock.pixmap().toImage())
+            img = self.imageOutputBlock.grab(self.imageOutputBlock.rect())
+            print(img)
+            # self.imageOutputBlock.render()
+            img.save(fname[0])
+    
     def exportImage(self, filename):
         # fname = q.QFileDialog.getOpenFileName(
         #     self,
@@ -136,7 +131,7 @@ class ImageUploadWindow(QMainWindow):
             imageInput.load(filename)
             self.imageOutputBlock.setPixmap(imageInput.scaled(self.imageOutputBlock.size()))#, qtc.Qt.AspectRatioMode.IgnoreAspectRatio))
             # self.imageOutputBlock.resize(imageInput.width(), imageInput.height())
-            self.imagePlaceHolderBot.setText("Click to Replace Image")
+            self.imagePlaceHolderBot.setText("Click to Save Image")
             self.imagePlaceHolderBot.setStyleSheet("""
                 QPushButton {
                     border-radius: 16pt;
@@ -163,9 +158,9 @@ class ImageUploadWindow(QMainWindow):
             return
         else:
             if currentImage[-5] == '2':
-                self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/Images/sample_image.png")
+                self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image.png")
             else:
-                self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/Images/sample_image_2.png")
+                self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image_2.png")
         return
         
 
