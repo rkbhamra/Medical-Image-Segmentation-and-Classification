@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
 import json
@@ -78,34 +77,27 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # tx, ty = utils.get_images('./example_data', img_width, img_height)
 # draw_images(tx, ty)
 
-# Load the data
-try:
-    x_train = np.load('save_data/x_train.npy')
-    y_train = np.load('save_data/y_train.npy')
-    x_validation = np.load('save_data/x_validation.npy')
-    y_validation = np.load('save_data/y_validation.npy')
-except:
-    x_data, y_data = utils.get_images('./train', img_width, img_height)
+'''
+# Load the data for training
+x_data, y_data = utils.get_images('./train', img_width, img_height)
 
-    train_ratio = 0.8
-    x_train = x_data[:int(len(x_data) * train_ratio)]
-    y_train = y_data[:int(len(y_data) * train_ratio)]
-    x_validation = x_data[int(len(x_data) * train_ratio):]
-    y_validation = y_data[int(len(y_data) * train_ratio):]
-
-    np.save('save_data/x_train.npy', x_train)
-    np.save('save_data/y_train.npy', y_train)
-    np.save('save_data/x_validation.npy', x_validation)
-    np.save('save_data/y_validation.npy', y_validation)
-
+train_ratio = 0.8
+x_train = x_data[:int(len(x_data) * train_ratio)]
+y_train = y_data[:int(len(y_data) * train_ratio)]
+x_validation = x_data[int(len(x_data) * train_ratio):]
+y_validation = y_data[int(len(y_data) * train_ratio):]
 
 # Training
 # train_model('models/tuberculosis_model.keras', x_train, y_train, x_validation, y_validation)
 # history = load_model_history('models/tuberculosis_model')
+'''
+
+# Load the data for testing
+x_test, y_test = utils.get_images('./test', img_width, img_height)
 
 # Testing
-# model = tf.keras.models.load_model('models/tuberculosis_model.keras')
-# test_model(model, x_validation, y_validation)
+model = tf.keras.models.load_model('models/tuberculosis_model.keras')
+test_model(model, x_test, y_test)
 
 
 
