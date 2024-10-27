@@ -1,61 +1,104 @@
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
+import json
 import utils
 
 
-# Set UTF-8 encoding for standard output
-# sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+def draw_images(images, labels):
+    plt.figure(figsize=(10, 10))
+    for i in range(min(9, images.shape[0])):
+        plt.subplot(3, 3, i + 1)
+        plt.imshow(images[i])
+        plt.title(class_names[labels[i]])
+        plt.axis("off")
+    plt.show()
 
+
+def train_model(model_save, x_train, y_train, x_validation, y_validation):
+    print(f'data size :: {len(x_train)}')
+
+    model = models.Sequential([
+        layers.Conv2D(16, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Conv2D(32, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Conv2D(64, 3, padding='same', activation='relu'),
+        layers.MaxPooling2D(),
+        layers.Flatten(),
+        layers.Dense(256, activation='relu'),
+        layers.Dense(2)
+    ])
+
+    model.compile(
+        optimizer='adam',
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+        metrics=['accuracy']
+    )
+
+    model.summary()
+    history = model.fit(x_train, y_train, epochs=10, validation_data=(x_validation, y_validation))
+
+    model.save(model_save)
+    with open(f'{model_save}_history.json', 'w') as f:
+        json.dump(history.history, f)
+
+    plt.plot(history.history['accuracy'], label='accuracy')
+    plt.plot(history.history['val_accuracy'], label='val_accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.ylim([0.5, 1])
+    plt.legend(loc='lower right')
+    plt.show()
+
+
+def test_model(model, x_test, y_test):
+    test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
+    print(f'test accuracy: {test_acc}')
+    print(f'test loss: {test_loss}')
+
+
+'''
+ ******************************************************************************************************************
+'''
+
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 img_height = 512
 img_width = 512
 class_names = ['healthy lung', 'tuberculosis lung']
-folder = 'train'
 
-# Load images and labels
-x_train, y_train = utils.get_images(folder, img_width, img_height)
-x_train, y_train = np.array(x_train), np.array(y_train)
+# draw stuff example
+# tx, ty = utils.get_images('./example_data', img_width, img_height)
+# draw_images(tx, ty)
 
-x_test, y_test = utils.get_images(folder, img_width, img_height)
-x_test, y_test = np.array(x_test), np.array(y_test)
+# Load the data
+try:
+    x_train = np.load('save_data/x_train.npy')
+    y_train = np.load('save_data/y_train.npy')
+    x_validation = np.load('save_data/x_validation.npy')
+    y_validation = np.load('save_data/y_validation.npy')
+except:
+    x_data, y_data = utils.get_images('./train', img_width, img_height)
 
-print(f'data size :: {len(x_train)}')
+    train_ratio = 0.8
+    x_train = x_data[:int(len(x_data) * train_ratio)]
+    y_train = y_data[:int(len(y_data) * train_ratio)]
+    x_validation = x_data[int(len(x_data) * train_ratio):]
+    y_validation = y_data[int(len(y_data) * train_ratio):]
 
-model = models.Sequential([
-  layers.Conv2D(16, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Conv2D(32, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Conv2D(64, 3, padding='same', activation='relu'),
-  layers.MaxPooling2D(),
-  layers.Flatten(),
-  layers.Dense(256, activation='relu'),
-  layers.Dense(2)
-])
+    np.save('save_data/x_train.npy', x_train)
+    np.save('save_data/y_train.npy', y_train)
+    np.save('save_data/x_validation.npy', x_validation)
+    np.save('save_data/y_validation.npy', y_validation)
 
-model.compile(
-    optimizer='adam',
-    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    metrics=['accuracy']
-)
 
-model.summary()
-history = model.fit(x_train, y_train, epochs=10, validation_data=(x_test, y_test))
-model.save('models/tuberculosis_model.keras')
+# Training
+# train_model('models/tuberculosis_model.keras', x_train, y_train, x_validation, y_validation)
 
-# display images from training dataset
-# plt.figure(figsize=(10, 10))
-# for images, labels in train_ds.take(1):  # only take first batch
-#     for i in range(min(9, images.shape[0])):
-#         ax = plt.subplot(3, 3, i + 1)
-#         plt.imshow(images[i].numpy().astype("uint8"))
-#         plt.title(class_names[labels[i]])
-#         plt.axis("off")
-#
-# plt.show()
-
+# Testing
+# model = tf.keras.models.load_model('models/tuberculosis_model.keras')
+# test_model(model, x_validation, y_validation)
 
 '''
 acc = history.history['accuracy']

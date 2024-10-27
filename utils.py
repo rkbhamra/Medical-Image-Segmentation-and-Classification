@@ -29,15 +29,22 @@ def get_images(folder, w, h):
 
     try:
         for f in os.listdir(f'{folder}/img'):
-            i += 1
-            if i % 100 == 0:
-                print(f'loaded {i} images')
-
             images.append(cv2.resize(cv2.imread(f'{folder}/img/{f}'), (w, h)) / 255.0)
             classes.append(int(f.replace('.png', '')[-1]))
             # with open(f'{folder}/ann/{f}.json', 'r') as file:
             #     classes.append(json.load(file))
+
+            i += 1
+            if i % 100 == 0:
+                print(f'loaded {i} images')
     except Exception as e:
         print(e)
 
-    return images, classes
+    print('shuffling...')
+    res = list(zip(images, classes))
+    np.random.shuffle(res)
+    a, b = zip(*res)
+
+    print(f'done, loaded {i} images')
+
+    return np.array(a), np.array(b)

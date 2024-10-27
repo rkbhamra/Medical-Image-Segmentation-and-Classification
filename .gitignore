@@ -1,6 +1,7 @@
 /train
 /test
 /example_data
+/save_data
 /models
 /.venv
 /.idea
