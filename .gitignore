@@ -1,4 +1,7 @@
 /train
 /test
+/example_data
+/models
 /.venv
 /.idea
+/__pycache__

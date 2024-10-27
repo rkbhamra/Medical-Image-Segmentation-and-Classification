@@ -23,16 +23,21 @@ def mask_2_base64(mask):
 
 def get_images(folder, w, h):
     images = []
-    json_data = []
+    classes = []
+    i = 0
+    print('loading data...')
 
     try:
         for f in os.listdir(f'{folder}/img'):
-            images.append(cv2.resize(cv2.imread(f'{folder}/img/{f}', cv2.IMREAD_GRAYSCALE), (w, h)))
-            with open(f'{folder}/ann/{f}.json', 'r') as file:
-                json_data.append(json.load(file))
+            i += 1
+            if i % 100 == 0:
+                print(f'loaded {i} images')
+
+            images.append(cv2.resize(cv2.imread(f'{folder}/img/{f}'), (w, h)) / 255.0)
+            classes.append(int(f.replace('.png', '')[-1]))
+            # with open(f'{folder}/ann/{f}.json', 'r') as file:
+            #     classes.append(json.load(file))
     except Exception as e:
         print(e)
 
-    return images, json_data
-
-
+    return images, classes
