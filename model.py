@@ -44,13 +44,19 @@ def train_model(model_save, x_train, y_train, x_validation, y_validation):
     with open(f'{model_save}_history.json', 'w') as f:
         json.dump(history.history, f)
 
-    plt.plot(history.history['accuracy'], label='accuracy')
-    plt.plot(history.history['val_accuracy'], label='val_accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.ylim([0.5, 1])
-    plt.legend(loc='lower right')
-    plt.show()
+
+def load_model_history(model_save):
+    with open(f'{model_save}.keras_history.json', 'r') as f:
+        history = json.load(f)
+
+        plt.plot(history['accuracy'], label='accuracy')
+        plt.plot(history['val_accuracy'], label='val_accuracy')
+        plt.xlabel('Epoch')
+        plt.ylabel('Accuracy')
+        plt.ylim([0.5, 1])
+        plt.legend(loc='lower right')
+        plt.show()
+    return history
 
 
 def test_model(model, x_test, y_test):
@@ -95,10 +101,14 @@ except:
 
 # Training
 # train_model('models/tuberculosis_model.keras', x_train, y_train, x_validation, y_validation)
+# history = load_model_history('models/tuberculosis_model')
 
 # Testing
 # model = tf.keras.models.load_model('models/tuberculosis_model.keras')
 # test_model(model, x_validation, y_validation)
+
+
+
 
 '''
 acc = history.history['accuracy']
