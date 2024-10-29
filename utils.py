@@ -48,3 +48,8 @@ def get_images(folder, w, h):
     print(f'done, loaded {i} images')
 
     return np.array(a), np.array(b)
+
+
+def get_image(folder, w, h):
+    img = cv2.resize(cv2.imread(folder), (w, h)) / 255.0
+    return img
