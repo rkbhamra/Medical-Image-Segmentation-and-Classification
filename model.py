@@ -15,8 +15,14 @@ def draw_images(images, labels):
     plt.show()
 
 
-def train_model(model_save, x_train, y_train, x_validation, y_validation):
-    print(f'data size :: {len(x_train)}')
+def train_model(model_save, x_data, y_data):
+    train_ratio = 0.8
+    x_train = x_data[:int(len(x_data) * train_ratio)]
+    y_train = y_data[:int(len(y_data) * train_ratio)]
+    x_validation = x_data[int(len(x_data) * train_ratio):]
+    y_validation = y_data[int(len(y_data) * train_ratio):]
+
+    print(f'data size :: {len(x_data)}')
 
     model = models.Sequential([
         layers.Conv2D(16, 3, padding='same', activation='relu'),
@@ -65,7 +71,13 @@ def test_model(model, x_test, y_test):
 
 
 '''
- ******************************************************************************************************************
+******************************************************************************************************************
+    will need the following to run:
+    - test folder
+    - train folder
+    - models folder (empty if you want to train a new model, for testing should contain tuberculosis_model.keras) 
+    - pip install -r requirements.txt
+******************************************************************************************************************
 '''
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
@@ -73,22 +85,12 @@ img_height = 512
 img_width = 512
 class_names = ['healthy lung', 'tuberculosis lung']
 
-# draw stuff example
-# tx, ty = utils.get_images('./example_data', img_width, img_height)
-# draw_images(tx, ty)
-
 '''
 # Load the data for training
 x_data, y_data = utils.get_images('./train', img_width, img_height)
 
-train_ratio = 0.8
-x_train = x_data[:int(len(x_data) * train_ratio)]
-y_train = y_data[:int(len(y_data) * train_ratio)]
-x_validation = x_data[int(len(x_data) * train_ratio):]
-y_validation = y_data[int(len(y_data) * train_ratio):]
-
 # Training
-# train_model('models/tuberculosis_model.keras', x_train, y_train, x_validation, y_validation)
+# train_model('models/tuberculosis_model.keras', x_data, y_data)
 # history = load_model_history('models/tuberculosis_model')
 '''
 
@@ -98,66 +100,3 @@ x_test, y_test = utils.get_images('./test', img_width, img_height)
 # Testing
 model = tf.keras.models.load_model('models/tuberculosis_model.keras')
 test_model(model, x_test, y_test)
-
-
-
-
-'''
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
-
-loss = history.history['loss']
-val_loss = history.history['val_loss']
-
-epochs_range = range(epochs)
-
-# plt.figure(figsize=(8, 8))
-# plt.subplot(1, 2, 1)
-# plt.plot(epochs_range, acc, label='Training Accuracy')
-# plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-# plt.legend(loc='lower right')
-# plt.title('Training and Validation Accuracy')
-#
-# plt.subplot(1, 2, 2)
-# plt.plot(epochs_range, loss, label='Training Loss')
-# plt.plot(epochs_range, val_loss, label='Validation Loss')
-# plt.legend(loc='upper right')
-# plt.title('Training and Validation Loss')
-#plt.show()
-
-
-
-# After training the model, add this section to test the model on your test dataset.
-
-# 1. Preprocess the test dataset
-test_ds = test_ds.map(lambda x, y: (normalization_layer(x), y))
-
-# 2. Make predictions on the test dataset
-predictions = model.predict(test_ds)
-
-# 3. Convert predictions to class labels
-predicted_classes = np.argmax(predictions, axis=-1)
-
-# 4. Get true labels (if available)
-true_labels = np.concatenate([y.numpy() for _, y in test_ds], axis=0)
-
-# 5. Calculate accuracy (if true labels are available)
-test_accuracy = np.mean(predicted_classes == true_labels)
-print(f'Test accuracy: {test_accuracy * 100:.2f}%')
-
-# 6. Display results
-# Visualize some test images with predictions
-# plt.figure(figsize=(10, 10))
-# for images, labels in test_ds.take(1):  # only take first batch
-#     for i in range(min(9, images.shape[0])):
-#         ax = plt.subplot(3, 3, i + 1)
-#         plt.imshow(images[i].numpy().astype("uint8"))
-#         plt.title(f'Predicted: {class_names[predicted_classes[i]]}, True: {class_names[true_labels[i]]}' if true_labels is not None else f'Predicted: {class_names[predicted_classes[i]]}')
-#         plt.axis("off")
-#
-# plt.show()
-
-# this is bad: Test accuracy: 51.04%
-
-'''
-
