@@ -1,7 +1,7 @@
-/train
-/test
-/example_data
-/save_data
+/res/train
+/res/test
+/res/save_data
+/res/mendeley
 /models
 /.venv
 /.idea
