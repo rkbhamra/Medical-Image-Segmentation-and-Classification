@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers, models
+from sklearn.model_selection import StratifiedKFold
 import json
 import utils
 
@@ -16,39 +17,47 @@ def draw_images(images, labels):
     plt.show()
 
 
-def train_model(model_dir, x_data, y_data):
-    train_ratio = 0.8
-    x_train = x_data[:int(len(x_data) * train_ratio)]
-    y_train = y_data[:int(len(y_data) * train_ratio)]
-    x_validation = x_data[int(len(x_data) * train_ratio):]
-    y_validation = y_data[int(len(y_data) * train_ratio):]
-
+def train_model(model_dir, x_data, y_data, k_folds=5):
     print(f'data size :: {len(x_data)}')
+    skf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=42)
+    fold_accuracies = []
 
-    model = models.Sequential([
-        layers.Conv2D(16, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(32, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Conv2D(64, 3, padding='same', activation='relu'),
-        layers.MaxPooling2D(),
-        layers.Flatten(),
-        layers.Dense(256, activation='relu'),
-        layers.Dense(2, activation='softmax')
-    ])
+    for fold, (xi, yi) in enumerate(skf.split(x_data, y_data)):
+        print(f"Training fold {fold + 1}/{k_folds}...")
+        x_train, x_validation = x_data[xi], x_data[yi]
+        y_train, y_validation = y_data[xi], y_data[yi]
 
-    model.compile(
-        optimizer='adam',
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-        metrics=['accuracy']
-    )
+        model = models.Sequential([
+            layers.Conv2D(16, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(32, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(64, 3, padding='same', activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Flatten(),
+            layers.Dense(256, activation='relu'),
+            layers.Dense(2, activation='softmax')
+        ])
 
-    model.summary()
-    history = model.fit(x_train, y_train, epochs=10, validation_data=(x_validation, y_validation))
+        model.compile(
+            optimizer='adam',
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            metrics=['accuracy']
+        )
 
-    model.save(model_dir)
-    with open(f'{model_dir}_history.json', 'w') as f:
-        json.dump(history.history, f)
+        model.summary()
+        history = model.fit(x_train, y_train, epochs=10, validation_data=(x_validation, y_validation))
+
+        model.save(model_dir)
+        with open(f'{model_dir}_history.json', 'w') as f:
+            json.dump(history.history, f)
+
+        val_accuracy = history.history['val_accuracy'][-1]
+        fold_accuracies.append(val_accuracy)
+        print(f"Fold {fold + 1} Validation Accuracy: {val_accuracy:.4f}")
+
+    avg_accuracy = np.mean(fold_accuracies)
+    print(f"Average Validation Accuracy: {avg_accuracy:.4f}")
 
 
 def load_model_history(model_dir):
@@ -86,28 +95,36 @@ def use_model(model_dir, img_dir):
 '''
 ******************************************************************************************************************
     will need the following to run:
-    - test folder
-    - train folder
-    - models folder (empty if you want to train a new model, for testing should contain .keras model) 
+    - res/test folder
+    - res/train folder
+    - models folder (empty if you want to train a new model, for testing it should contain .keras file) 
     - pip install -r requirements.txt
     
-    current model acc: 95.8% (92/96 images classified correctly)
+    current model acc: 92.7%
+    current model loss: 0.213
 ******************************************************************************************************************
 '''
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-img_height = 512
-img_width = 512
+img_height = 256
+img_width = 256
 class_names = ['healthy lung', 'tuberculosis lung']
 
 
-# Load the data for training
+# Load the data for training (https://datasetninja.com/chest-xray)
 # x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
+
+# Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
+# x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0)
+# x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1)
+
+# concatenate the data
+# x_data = np.concatenate((x_data, x_data2, x_data3))
+# y_data = np.concatenate((y_data, y_data2, y_data3))
 
 # Training
 # train_model('models/tuberculosis_model.keras', x_data, y_data)
 # history = load_model_history('models/tuberculosis_model')
-
 
 # Load the data for testing
 # x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
@@ -116,4 +133,4 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
-use_model('models/tuberculosis_model.keras', 'res/test/img/CHNCXR_0025_0.png')
+# use_model('models/tuberculosis_model.keras', 'lung.jpeg')

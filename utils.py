@@ -21,14 +21,14 @@ def mask_2_base64(mask):
     return base64.b64encode(zlib.compress(bytes)).decode('utf-8')
 
 
-def get_images(folder, w, h):
+def get_images(folder, w, h, mendeley=False, c=0):
     images = []
     classes = []
     i = 0
     print('loading data...')
 
     try:
-        for f in os.listdir(f'{folder}/img'):
+        for f in os.listdir(folder):
             images.append(cv2.resize(cv2.imread(f'{folder}/{f}'), (w, h)) / 255.0)
             if mendeley:
                 classes.append(c)
