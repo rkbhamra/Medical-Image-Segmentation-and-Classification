@@ -63,12 +63,10 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
 def load_model_history(model_dir):
     with open(f'{model_dir}.keras_history.json', 'r') as f:
         history = json.load(f)
-
-        plt.plot(history['accuracy'], label='accuracy')
-        plt.plot(history['val_accuracy'], label='val_accuracy')
+        plt.plot(history['loss'], label='loss')
         plt.xlabel('Epoch')
-        plt.ylabel('Accuracy')
-        plt.ylim([0.5, 1])
+        plt.ylabel('Loss')
+        plt.ylim([0, 1])
         plt.legend(loc='lower right')
         plt.show()
     return history
@@ -134,3 +132,5 @@ class_names = ['healthy lung', 'tuberculosis lung']
 
 # Use model
 # use_model('models/tuberculosis_model.keras', 'lung.jpeg')
+
+load_model_history('models/tuberculosis_model')
