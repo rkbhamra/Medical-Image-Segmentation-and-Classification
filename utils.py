@@ -3,6 +3,7 @@ import cv2, zlib, base64, io
 from PIL import Image
 import json
 import os
+import segmentation
 
 
 def base64_2_mask(s):
@@ -48,3 +49,9 @@ def get_images(folder, w, h, mendeley=False, c=0):
 def get_image(folder, w, h):
     img = cv2.resize(cv2.imread(folder), (w, h)) / 255.0
     return img
+
+def get_masked_lungs(img):
+    lung_mask, masked_lungs = segmentation.segmentation(img)
+    return lung_mask, masked_lungs
+
+get_masked_lungs(r'C:\Users\reetr\OneDrive\Desktop\Medical-Image-Segmentation-and-Classification-1\res\example_data\img\CHNCXR_0025_0.png')
