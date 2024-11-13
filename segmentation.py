@@ -1,40 +1,30 @@
 import numpy as np
 import cv2 as cv
-import scipy.ndimage as nd
-from matplotlib import pyplot as plt
+
 
 img = cv.imread(r'C:\Users\reetr\OneDrive\Desktop\CPS843\Medical-Image-Segmentation-and-Classification\res\example_data\img\CHNCXR_0025_0.png', cv.IMREAD_GRAYSCALE)
+height, width = img.shape
 
-#blurred = cv.GaussianBlur(img, (5, 5), 0)
-edges = cv.Canny(img, 30, 50)
-plt.imshow(edges, cmap='gray')
-plt.title('Edge Image')
-plt.show()
+white_padding = np.zeros((50, width))
+white_padding[:, :] = 255
+img = np.row_stack((white_padding, img))
+img = 255 - img
+img[img > 70] = 255
+img[img <= 70] = 0
+black_padding = np.zeros((50, width))
+img = np.row_stack((black_padding, img))
 
-fill_im = nd.binary_fill_holes(edges).astype(np.uint8)
-plt.imshow(fill_im, cmap='gray')
-plt.title('Region Filling')
-plt.show()
+kernel = np.ones((10, 10), np.uint8)
+closing = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
+closing = np.uint8(closing)
+edges = cv.Canny(closing, 70, 200)
 
-#elevation
-elevation_map = cv.Sobel(img, cv.CV_64F, 1, 0, ksize=5)
-plt.imshow(elevation_map, cmap='gray')
-plt.title('Elevation Map')
-plt.show()
-
-#markers
-markers = np.zeros_like(img, dtype=np.int32)
-markers[img < 30] = 1  # Background
-markers[img > 150] = 2  # Foreground
-
-plt.imshow(markers, cmap='jet')
-plt.title('Markers')
-plt.show()
-
-#segmentation
-segmentation = cv.watershed(cv.cvtColor(img, cv.COLOR_GRAY2BGR), markers)
+contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
 
-plt.imshow(segmentation, cmap='gray')
-plt.title('Segmentation')
-plt.show()
+cv.imshow("Filled Lung Regions", cv.resize(cv.dilate(edges, np.ones((40, 40), np.uint8)), (512, 512)))
+output_dir = r'C:\Users\reetr\OneDrive\Desktop\CPS843\Medical-Image-Segmentation-and-Classification\output'
+cv.imwrite(f'{output_dir}/filled_lung_regions.png', closing)
+
+cv.waitKey()
+cv.destroyAllWindows()
