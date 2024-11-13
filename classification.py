@@ -46,7 +46,7 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
         )
 
         model.summary()
-        history = model.fit(x_train, y_train, epochs=10, validation_data=(x_validation, y_validation))
+        history = model.fit(x_train, y_train, epochs=10, validation_data=(x_validation, y_validation), verbose=0)
 
         model.save(model_dir)
         with open(f'{model_dir}_history.json', 'w') as f:
@@ -91,7 +91,7 @@ def use_model(model_dir, img_dir):
     print('predictions :: ', prediction)
     print(f'accuracy :: {prediction[0][index] * 100:.2f}%')
     print(class_names[index])
-    return class_names[index]
+    return [class_names[index], prediction[0][index]]
 
 
 '''
@@ -129,10 +129,10 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # history = load_model_history('models/tuberculosis_model')
 
 # Load the data for testing
-# x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
+x_test, y_test = utils.get_images('res/example_data/img', img_width, img_height)
 
 # Testing
 # test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
-use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
+# use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
