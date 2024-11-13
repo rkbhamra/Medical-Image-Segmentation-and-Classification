@@ -115,16 +115,16 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
 
 # Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
-# x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0)
-# x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1)
+x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0)
+x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1)
 
 # concatenate the data
-# x_data = np.concatenate((x_data, x_data2, x_data3))
-# y_data = np.concatenate((y_data, y_data2, y_data3))
+x_data = np.concatenate((x_data2, x_data3))
+y_data = np.concatenate((y_data2, y_data3))
 
 # Training
-# train_model('models/tuberculosis_model.keras', x_data, y_data)
-# history = load_model_history('models/tuberculosis_model')
+train_model('models/tuberculosis_model.keras', x_data, y_data)
+history = load_model_history('models/tuberculosis_model')
 
 # Load the data for testing
 # x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
