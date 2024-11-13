@@ -51,7 +51,7 @@ def get_image(folder, w, h):
     return img
 
 def get_masked_lungs(img):
-    lung_mask, masked_lungs = segmentation.segmentation(img)
-    return lung_mask, masked_lungs
+    lung_filter, masked_lungs = segmentation.segmentation(img)
+    return lung_filter, masked_lungs
 
 get_masked_lungs(r'C:\Users\reetr\OneDrive\Desktop\Medical-Image-Segmentation-and-Classification-1\res\example_data\img\CHNCXR_0025_0.png')
