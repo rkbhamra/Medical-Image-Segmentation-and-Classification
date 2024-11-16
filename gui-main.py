@@ -178,13 +178,13 @@ class ImageUploadWindow(QMainWindow):
             return
         else:
             lung_class, acc = use_model('models/tuberculosis_model.keras', currentImage)
-            print(lung_class, acc)
+            # print(lung_class, acc)
             lung_class = lung_class.split(" ")[0]
             lung_class = lung_class[0].upper() + lung_class[1:]
-            print(lung_class)
+            # print(lung_class)
             self.outputText.setText("Prediction: " + lung_class)
             accStr = f'Accuracy: {acc * 100:.2f}%'
-            print(accStr)
+            # print(accStr)
             self.accuracyText.setText(accStr)
             # if currentImage[-5] == '2':
             #     self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image.png")
