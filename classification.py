@@ -82,10 +82,9 @@ def test_model(model_dir, x_test, y_test):
 
 
 def use_model(model_dir, img_dir):
-    print(model_dir, img_dir)
     model = tf.keras.models.load_model(model_dir)
     img = np.array([utils.get_image(img_dir, img_width, img_height)])
-    print(img.shape)
+    # print(img.shape)
     prediction = model.predict(img, verbose=0)
     index = np.argmax(prediction)
     print('predictions :: ', prediction)
@@ -121,8 +120,8 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1)
 
 # concatenate the data
-# x_data = np.concatenate((x_data2, x_data3))
-# y_data = np.concatenate((y_data2, y_data3))
+# x_data = np.concatenate((x_data, x_data2, x_data3))
+# y_data = np.concatenate((y_data, y_data2, y_data3))
 
 # Training
 # train_model('models/tuberculosis_model.keras', x_data, y_data)
