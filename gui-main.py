@@ -6,6 +6,8 @@ from PyQt6.QtWidgets import QApplication, QMainWindow
 import PyQt6.QtCore as qtc
 import PyQt6.QtMultimediaWidgets as qtg
 
+from classification import use_model
+
 
 winWidth = 580
 winHeight = 680
@@ -13,9 +15,9 @@ winHeight = 680
 # winHeight = 700
 butWidth = 90
 butHeight = 30
-imgWidth = 480
-imgHeight = 270
-imgSize = (480, 270)
+imgWidth = 512
+imgHeight = 512
+imgSize = (512, 512)
 
 class ImageUploadWindow(QMainWindow):
 
@@ -42,21 +44,39 @@ class ImageUploadWindow(QMainWindow):
         titleText.setGeometry(0, 5, winWidth, 50)
 
         self.imageInputBlock = q.QLabel(self)
-        self.imageInputBlock.setGeometry(50, 60, imgWidth, imgHeight)
+        self.imageInputBlock.setGeometry(34, 60, imgWidth, imgHeight)
+
+        self.outputText = q.QLabel("", self)
+        self.outputText.setStyleSheet("""
+            QLabel {
+                font-size: 14pt;
+            }
+            """)
+        self.outputText.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        self.outputText.setGeometry(0, 610, winWidth, 40)
         
-        self.imageOutputBlock = q.QLabel(self)
-        self.imageOutputBlock.setGeometry(50, 380, imgWidth, imgHeight)
+        self.accuracyText = q.QLabel("", self)
+        self.accuracyText.setStyleSheet("""
+            QLabel {
+                font-size: 14pt;
+            }
+            """)
+        self.accuracyText.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        self.accuracyText.setGeometry(0, 638, winWidth, 40)
+        
+        # self.imageOutputBlock = q.QLabel(self)
+        # self.imageOutputBlock.setGeometry(50, 380, imgWidth, imgHeight)
 
         self.imagePlaceHolderTop = q.QPushButton("No Image Loaded Yet", self)
-        self.imagePlaceHolderTop.setGeometry(50, 60, imgWidth, imgHeight)
+        self.imagePlaceHolderTop.setGeometry(34, 60, imgWidth, imgHeight)
         self.imagePlaceHolderTop.clicked.connect(self.importImage)
 
-        self.imagePlaceHolderBot = q.QPushButton("No Image Loaded Yet", self)
-        self.imagePlaceHolderBot.setGeometry(50, 380, imgWidth, imgHeight)
-        self.imagePlaceHolderBot.clicked.connect(self.saveImage)
+        # self.imagePlaceHolderBot = q.QPushButton("No Image Loaded Yet", self)
+        # self.imagePlaceHolderBot.setGeometry(50, 380, imgWidth, imgHeight)
+        # self.imagePlaceHolderBot.clicked.connect(self.saveImage)
 
         processButton = q.QPushButton("Go", self)
-        processButton.setGeometry(260, 340, 60, 30)
+        processButton.setGeometry(260, 580, 60, 30)
         processButton.clicked.connect(self.processImage)
         processButton.setToolTip("Run algorithm to check for tuberculosis\nNOTE: RIGHT NOW THIS SIMPLY PUTS THE OTHER IMAGE")
 
@@ -66,7 +86,7 @@ class ImageUploadWindow(QMainWindow):
         fname = q.QFileDialog.getOpenFileName(
             self,
             "Open File",
-            "./InputImages",
+            "./res/example_data",
             "PNG Files (*.png);; All Files (*)",
         )
         print(fname)
@@ -157,10 +177,19 @@ class ImageUploadWindow(QMainWindow):
         if currentImage == "":
             return
         else:
-            if currentImage[-5] == '2':
-                self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image.png")
-            else:
-                self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image_2.png")
+            lung_class, acc = use_model('models/tuberculosis_model.keras', currentImage)
+            # print(lung_class, acc)
+            lung_class = lung_class.split(" ")[0]
+            lung_class = lung_class[0].upper() + lung_class[1:]
+            # print(lung_class)
+            self.outputText.setText("Prediction: " + lung_class)
+            accStr = f'Accuracy: {acc * 100:.2f}%'
+            # print(accStr)
+            self.accuracyText.setText(accStr)
+            # if currentImage[-5] == '2':
+            #     self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image.png")
+            # else:
+            #     self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image_2.png")
         return
         
 
