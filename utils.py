@@ -38,8 +38,6 @@ def get_images(folder, w, h, mendeley=False, c=0):
             i += 1
             if i % 100 == 0:
                 print(f'loaded {i} images')
-            if i == 120:
-                break
     except Exception as e:
         print(e)
 
