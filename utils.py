@@ -47,8 +47,9 @@ def get_images(folder, w, h, mendeley=False, c=0):
 
 
 def get_image(folder, w, h):
-    _, img = get_masked_lungs(folder, 256)
-    img = cv2.resize(img, (w, h)) / 255.0
+    # _, img = get_masked_lungs(folder, 256)
+    # img = cv2.resize(img, (w, h)) / 255.0
+    img = cv2.resize(cv2.imread(folder), (w, h)) / 255.0
     return img
 
 
