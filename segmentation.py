@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import os
 
 # major algo
 def identify_lungs(binary_image):
@@ -33,7 +34,7 @@ def identify_lungs(binary_image):
 
     return lung_image
 
-def segmentation(img_path):
+def segmentation(img_path, size):
     img = cv.imread(img_path, cv.IMREAD_GRAYSCALE)
     height, width = img.shape
 
@@ -44,6 +45,12 @@ def segmentation(img_path):
 
     # invert image colors (binary format with white as lung region)
     img = 255 - img
+    #if img.dtype != np.uint8:
+        #img = img.astype(np.uint8)
+
+    # Apply histogram equalization
+    #img = cv.equalizeHist(img)
+
     img[img > 80] = 255  #please don't change the thresholds, it messes up the rest of the code
     img[img <= 80] = 0
 
@@ -61,7 +68,7 @@ def segmentation(img_path):
 
 
 
-    lung_identified_image = cv.flip(identify_lungs(cv.flip(identify_lungs(cv.resize(closing,(256,256))),1)),1)
+    lung_identified_image = cv.flip(identify_lungs(cv.flip(identify_lungs(cv.resize(closing,(size,size))),1)),1)
 
 
     contours, _ = cv.findContours(lung_identified_image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
@@ -74,12 +81,12 @@ def segmentation(img_path):
 
 
     cv.drawContours(lung_mask, contours, -1, (255), thickness=cv.FILLED)
-    output_dir = r'C:\Users\reetr\OneDrive\Desktop\CPS843\Medical-Image-Segmentation-and-Classification\output'
-    cv.imwrite(f'{output_dir}/filled_lung_regions.png', lung_mask)
+    # output_dir = r'C:\Users\reetr\OneDrive\Desktop\CPS843\Medical-Image-Segmentation-and-Classification\output'
+    # cv.imwrite(f'{output_dir}/filled_lung_regions.png', lung_mask)
 
-    img = cv.imread(r'C:\Users\reetr\OneDrive\Desktop\Medical-Image-Segmentation-and-Classification-1\res\example_data\img\CHNCXR_0025_0.png')
+    # img = cv.imread(img_path)
 
-    img = cv.resize(img, (256, 256))
+    img = cv.resize(img, (size, size))
     for i in range(lung_mask.shape[0]):
         for j in range(lung_mask.shape[1]):
             if lung_mask[i][j] == 0:

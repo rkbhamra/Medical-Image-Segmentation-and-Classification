@@ -47,11 +47,12 @@ def get_images(folder, w, h, mendeley=False, c=0):
 
 
 def get_image(folder, w, h):
-    img = cv2.resize(cv2.imread(folder), (w, h)) / 255.0
+    _, img = get_masked_lungs(folder, 256)
+    img = cv2.resize(img, (w, h)) / 255.0
     return img
 
-def get_masked_lungs(img):
-    lung_filter, masked_lungs = segmentation.segmentation(img)
+
+def get_masked_lungs(folder, size):
+    lung_filter, masked_lungs = segmentation.segmentation(folder, size)
     return lung_filter, masked_lungs
 
-get_masked_lungs(r'C:\Users\reetr\OneDrive\Desktop\Medical-Image-Segmentation-and-Classification-1\res\example_data\img\CHNCXR_0025_0.png')

@@ -41,7 +41,7 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
 
         model.compile(
             optimizer='adam',
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+            loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
             metrics=['accuracy']
         )
 
@@ -82,13 +82,44 @@ def test_model(model_dir, x_test, y_test):
 def use_model(model_dir, img_dir):
     model = tf.keras.models.load_model(model_dir)
     img = np.array([utils.get_image(img_dir, img_width, img_height)])
-    # print(img.shape)
     prediction = model.predict(img, verbose=0)
     index = np.argmax(prediction)
     print('predictions :: ', prediction)
     print(f'accuracy :: {prediction[0][index] * 100:.2f}%')
     print(class_names[index])
+
+    draw_images(np.array(img), [index])
     return [class_names[index], prediction[0][index]]
+
+
+def init_training():
+    # Load the data for training (https://datasetninja.com/chest-xray)
+    x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
+
+    # Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
+    x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0)
+    x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1)
+
+    # Load the data but shifted in random directions
+    x_data4, y_data4 = np.concatenate((x_data, x_data2, x_data3)), np.concatenate((y_data, y_data2, y_data3))
+    for i in range(len(x_data4)):
+        xs, ys = np.random.randint(-20, 21, 2)
+        x_data4[i] = np.roll(x_data4[i], xs, axis=0)
+        x_data4[i] = np.roll(x_data4[i], ys, axis=1)
+
+    # concatenate the data
+    x_data = np.concatenate((x_data, x_data2, x_data3, x_data4))
+    y_data = np.concatenate((y_data, y_data2, y_data3, y_data4))
+
+    # Shuffle the data
+    indices = np.arange(x_data.shape[0])
+    np.random.shuffle(indices)
+    x_data = x_data[indices]
+    y_data = y_data[indices]
+
+    # Training
+    train_model('models/tuberculosis_model.keras', x_data, y_data)
+    load_model_history('models/tuberculosis_model')
 
 
 '''
@@ -105,33 +136,21 @@ def use_model(model_dir, img_dir):
 '''
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
-img_height = 256
-img_width = 256
+print("tensorflow version :: ", tf.__version__)
+img_height = 128
+img_width = 128
 class_names = ['healthy lung', 'tuberculosis lung']
 
-
-# Load the data for training (https://datasetninja.com/chest-xray)
-# x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
-
-# Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
-# x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0)
-# x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1)
-
-# concatenate the data
-# x_data = np.concatenate((x_data, x_data2, x_data3))
-# y_data = np.concatenate((y_data, y_data2, y_data3))
-
-# Training
-# train_model('models/tuberculosis_model.keras', x_data, y_data)
-# history = load_model_history('models/tuberculosis_model')
+# TRAINING
+# init_training()
 
 # Load the data for testing
-x_test, y_test = utils.get_images('res/example_data/img', img_width, img_height)
+# x_test, y_test = utils.get_images('res/example_data/img', img_width, img_height)
 
 # Testing
 # test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
-# use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
-
-load_model_history('models/tuberculosis_model')
+# use_model('models/tuberculosis_model.keras', 'lung.jpg')
+use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
+# load_model_history('models/tuberculosis_model')
