@@ -5,7 +5,10 @@ from tensorflow.keras import layers, models
 from sklearn.model_selection import StratifiedKFold
 import json
 import utils
+import time
 
+
+dev = '/gpu:0'
 
 def draw_images(images, labels):
     plt.figure(figsize=(10, 10))
@@ -21,36 +24,37 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
     print(f'data size :: {len(x_data)}')
     skf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=42)
     fold_accuracies = []
+    
 
     for fold, (xi, yi) in enumerate(skf.split(x_data, y_data)):
         print(f"Training fold {fold + 1}/{k_folds}...")
         x_train, x_validation = x_data[xi], x_data[yi]
         y_train, y_validation = y_data[xi], y_data[yi]
+        with tf.device(dev):
+            model = models.Sequential([
+                layers.Conv2D(16, 3, padding='same', activation='relu'),
+                layers.MaxPooling2D(),
+                layers.Conv2D(32, 3, padding='same', activation='relu'),
+                layers.MaxPooling2D(),
+                layers.Conv2D(64, 3, padding='same', activation='relu'),
+                layers.MaxPooling2D(),
+                layers.Flatten(),
+                layers.Dense(256, activation='relu'),
+                layers.Dense(2, activation='softmax')
+            ])
 
-        model = models.Sequential([
-            layers.Conv2D(16, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(32, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(64, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Flatten(),
-            layers.Dense(256, activation='relu'),
-            layers.Dense(2, activation='softmax')
-        ])
+            model.compile(
+                optimizer='adam',
+                loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                metrics=['accuracy']
+            )
 
-        model.compile(
-            optimizer='adam',
-            loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=['accuracy']
-        )
+            model.summary()
+            history = model.fit(x_train, y_train, epochs=10, validation_data=(x_validation, y_validation))
 
-        model.summary()
-        history = model.fit(x_train, y_train, epochs=10, validation_data=(x_validation, y_validation))
-
-        model.save(model_dir)
-        with open(f'{model_dir}_history.json', 'w') as f:
-            json.dump(history.history, f)
+            model.save(model_dir)
+            with open(f'{model_dir}_history.json', 'w') as f:
+                json.dump(history.history, f)
 
         val_accuracy = history.history['val_accuracy'][-1]
         fold_accuracies.append(val_accuracy)
@@ -73,13 +77,15 @@ def load_model_history(model_dir):
 
 
 def test_model(model_dir, x_test, y_test):
-    model = tf.keras.models.load_model(model_dir)
-    test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
-    print(f'test accuracy: {test_acc}')
-    print(f'test loss: {test_loss}')
+    with tf.device(dev):
+        model = tf.keras.models.load_model(model_dir)
+        test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
+        print(f'test accuracy: {test_acc}')
+        print(f'test loss: {test_loss}')
 
 
 def use_model(model_dir, img_dir):
+    # with tf.device('/cpu:0'):
     model = tf.keras.models.load_model(model_dir)
     img = np.array([utils.get_image(img_dir, img_width, img_height)])
     prediction = model.predict(img, verbose=0)
@@ -104,33 +110,51 @@ def use_model(model_dir, img_dir):
 '''
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+# tf.debugging.set_log_device_placement(True)
 img_height = 256
 img_width = 256
 class_names = ['healthy lung', 'tuberculosis lung']
+start_time = time.time()
 
 
 # Load the data for training (https://datasetninja.com/chest-xray)
 # x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
 
 # Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
-# x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0)
-# x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1)
 
+max_images = 256
+x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0, max=max_images)
+x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, max=max_images)
+load_time = time.time()
+print("LOAD TIME: ", load_time - start_time)
 # concatenate the data
-# x_data = np.concatenate((x_data, x_data2, x_data3))
-# y_data = np.concatenate((y_data, y_data2, y_data3))
+x_data = np.concatenate((x_data2, x_data3))
+print("Concatenated X")
+y_data = np.concatenate((y_data2, y_data3))
+print("Concatenated Y")
+conc_time = time.time()
+print("CONCAT TIME: ", conc_time - load_time)
 
 # Training
-# train_model('models/tuberculosis_model.keras', x_data, y_data)
-# history = load_model_history('models/tuberculosis_model')
-
+train_model('models/build_time_test/tuberculosis_model.keras', x_data, y_data)
+history = load_model_history('models/build_time_test/tuberculosis_model')
+train_time = time.time()
+print("TRAINING TIME: ", (train_time - conc_time))
 # Load the data for testing
-# x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
+x_test, y_test = utils.get_images('res/example_data/img', img_width, img_height)
+# x_data_test1, y_data_test1 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0)
+# x_data_test2, y_data_test2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0)
 
 # Testing
-# test_model('models/tuberculosis_model.keras', x_test, y_test)
+test_model('models/build_time_test/tuberculosis_model.keras', x_test, y_test)
+test_time = time.time()
+print("TESTING TIME: ", (test_time - train_time))
 
 # Use model
-# use_model('models/tuberculosis_model.keras', 'lung.jpeg')
-
-load_model_history('models/tuberculosis_model')
+"""
+use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
+use_time = time.time()
+"""
+# print("USE TIME: ", (use_time - test_time))
+print("TOTAL TIME: ", (test_time - start_time))
+load_model_history('models/build_time_test/tuberculosis_model')

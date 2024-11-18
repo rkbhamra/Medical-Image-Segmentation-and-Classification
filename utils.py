@@ -22,7 +22,7 @@ def mask_2_base64(mask):
     return base64.b64encode(zlib.compress(bytes)).decode('utf-8')
 
 
-def get_images(folder, w, h, mendeley=False, c=0):
+def get_images(folder, w, h, mendeley=False, c=0, max=0):
     images = []
     classes = []
     i = 0
@@ -39,6 +39,8 @@ def get_images(folder, w, h, mendeley=False, c=0):
             i += 1
             if i % 100 == 0:
                 print(f'loaded {i} images')
+            if i == max:
+                break
     except Exception as e:
         print(e)
 
@@ -54,4 +56,4 @@ def get_masked_lungs(img):
     lung_filter, masked_lungs = segmentation.segmentation(img)
     return lung_filter, masked_lungs
 
-get_masked_lungs(r'C:\Users\reetr\OneDrive\Desktop\Medical-Image-Segmentation-and-Classification-1\res\example_data\img\CHNCXR_0025_0.png')
+# get_masked_lungs(r'C:\Users\reetr\OneDrive\Desktop\Medical-Image-Segmentation-and-Classification-1\res\example_data\img\CHNCXR_0025_0.png')
