@@ -28,11 +28,11 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
         y_train, y_validation = y_data[xi], y_data[yi]
 
         model = models.Sequential([
-            layers.Conv2D(16, 3, padding='same', activation='relu', input_shape=(img_height, img_width, 3)),
-            layers.MaxPooling2D(),
-            layers.Conv2D(32, 3, padding='same', activation='relu'),
+            layers.Conv2D(32, 3, padding='same', activation='relu', input_shape=(img_height, img_width, 3)),
             layers.MaxPooling2D(),
             layers.Conv2D(64, 3, padding='same', activation='relu'),
+            # layers.MaxPooling2D(),
+            # layers.Conv2D(64, 3, padding='same', activation='relu'),
             layers.MaxPooling2D(),
             layers.Flatten(),
             layers.Dense(128, activation='relu'),
@@ -88,8 +88,10 @@ def use_model(model_dir, img_dir):
     print(f'accuracy :: {prediction[0][index] * 100:.2f}%')
     print(class_names[index])
 
-    draw_images(np.array(img), [index])
-    return [class_names[index], prediction[0][index]]
+    ui_img = utils.get_ui_output(img_dir, img_width, img_height, index)
+    draw_images(np.array([ui_img]), [index])
+
+    return [class_names[index], prediction[0][index], ui_img]
 
 
 def init_training():
@@ -128,18 +130,21 @@ def init_training():
 
 '''
 ******************************************************************************************************************
-    will need the following to run:
-    - res/test folder
-    - res/train folder
-    - models folder (empty if you want to train a new model, for testing it should contain .keras file) 
     - pip install -r requirements.txt
+    
+    will need the following to train new model:
+    - res/mendeley
+    - res/train
+    
+    will need the following to use model:
+    - models folder (contains .keras file) 
 ******************************************************************************************************************
 '''
 
 print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 print("tensorflow version :: ", tf.__version__)
-img_height = 256
-img_width = 256
+img_height = 128
+img_width = 128
 class_names = ['healthy lung', 'tuberculosis lung']
 
 # TRAINING
@@ -152,5 +157,7 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
-# use_model('models/tuberculosis_model.keras', 'lung.jpg')
-# use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
+# use_model('models/tuberculosis_model3.keras', 'lung.jpg')
+use_model('models/tuberculosis_model3.keras', 'res/example_data/img/CHNCXR_0025_0.png')
+
+# load_model_history('models/tuberculosis_model')

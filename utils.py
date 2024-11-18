@@ -22,15 +22,15 @@ def mask_2_base64(mask):
     return base64.b64encode(zlib.compress(bytes)).decode('utf-8')
 
 
-def get_images(folder, w, h, mendeley=False, c=0):
+def get_images(img_path, w, h, mendeley=False, c=0):
     images = []
     classes = []
     i = 0
     print('loading data...')
 
     try:
-        for f in os.listdir(folder):
-            images.append(cv2.resize(cv2.imread(f'{folder}/{f}'), (w, h)) / 255.0)
+        for f in os.listdir(img_path):
+            images.append(cv2.resize(cv2.imread(f'{img_path}/{f}'), (w, h)) / 255.0)
             if mendeley:
                 classes.append(c)
             else:
@@ -46,14 +46,31 @@ def get_images(folder, w, h, mendeley=False, c=0):
     return np.array(images), np.array(classes)
 
 
-def get_image(folder, w, h):
-    # _, img = get_masked_lungs(folder, 256)
+def get_image(img_path, w, h):
+    # _, img = get_masked_lungs(img_path, 256)
     # img = cv2.resize(img, (w, h)) / 255.0
-    img = cv2.resize(cv2.imread(folder), (w, h)) / 255.0
+    img = cv2.resize(cv2.imread(img_path), (w, h)) / 255.0
     return img
 
 
-def get_masked_lungs(folder, size):
-    lung_filter, masked_lungs = segmentation.segmentation(folder, size)
+def get_masked_lungs(img_path, size):
+    lung_filter, masked_lungs = segmentation.segmentation(img_path, size)
     return lung_filter, masked_lungs
+
+
+def get_ui_output(img_path, w, h, class_type):
+    color = [0, 255, 0] if class_type == 0 else [255, 0, 0]
+    img = get_image(img_path, w, h)
+    mask, _ = get_masked_lungs(img_path, 256)
+    mask = cv2.resize(mask, (w, h))
+    mask = np.repeat(mask[:, :, np.newaxis], 3, axis=2)
+    mask = mask * color
+
+    img = img.astype(np.float32)
+    mask = mask.astype(np.float32)
+
+    return cv2.addWeighted(img, 0.8, mask, 0.1, 0)
+
+
+
 
