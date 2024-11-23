@@ -2,6 +2,7 @@
 /res/test
 /res/save_data
 /res/mendeley
+/res/kaggle
 /models
 /.venv
 /.idea

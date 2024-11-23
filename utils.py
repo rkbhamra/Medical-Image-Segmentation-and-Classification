@@ -22,7 +22,7 @@ def mask_2_base64(mask):
     return base64.b64encode(zlib.compress(bytes)).decode('utf-8')
 
 
-def get_images(img_path, w, h, mendeley=False, c=0, limit=-1):
+def get_images(img_path, w, h, ordered=False, c=0, limit=-1, skip=0):
     images = []
     classes = []
     i = 0
@@ -30,22 +30,25 @@ def get_images(img_path, w, h, mendeley=False, c=0, limit=-1):
 
     try:
         for f in os.listdir(img_path):
+            i += 1
+            if i < skip:
+                continue
+
             images.append(cv2.resize(cv2.imread(f'{img_path}/{f}'), (w, h)) / 255.0)
-            if mendeley:
+            if ordered:
                 classes.append(c)
             else:
                 classes.append(int(f.replace('.png', '')[-1]))
 
-            i += 1
             if i % 100 == 0:
-                print(f'loaded {i} images')
+                print(f'loaded {i - skip} images')
 
-            if i == limit:
+            if i == limit + skip:
                 break
     except Exception as e:
         print(e)
 
-    print(f'done, loaded {i} images')
+    print(f'done, loaded {i - skip} images')
     return np.array(images), np.array(classes)
 
 
