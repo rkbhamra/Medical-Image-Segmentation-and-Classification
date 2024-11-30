@@ -6,6 +6,8 @@ from tensorflow.keras.regularizers import l2
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 import json
 import utils
 
@@ -27,8 +29,8 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
 
     # data augmentation (dont need rn)
     train_datagen = ImageDataGenerator(
-        # width_shift_range=0.2,
-        # height_shift_range=0.2,
+        # width_shift_range=0.1,
+        # height_shift_range=0.1,
     )
 
     val_datagen = ImageDataGenerator()
@@ -91,7 +93,7 @@ def load_model_history(model_dir):
         plt.xlabel('Epoch')
         plt.ylabel('Loss')
         plt.ylim([0, 1])
-        plt.legend(loc='lower right')
+        plt.legend(loc='upper right')
         plt.title('Training and Validation Loss')
 
         # Plot training & validation accuracy values
@@ -113,6 +115,21 @@ def test_model(model_dir, x_test, y_test):
     test_loss, test_acc = model.evaluate(x_test, y_test, verbose=2)
     print(f'test accuracy: {test_acc}')
     print(f'test loss: {test_loss}')
+
+    # Predict the labels for the test data
+    y_pred = model.predict(x_test, verbose=0)
+    y_pred_classes = np.round(y_pred).astype(int).flatten()
+
+    # Compute the confusion matrix
+    cm = confusion_matrix(y_test, y_pred_classes)
+
+    # Plot the confusion matrix
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=class_names, yticklabels=class_names)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix')
+    plt.show()
 
 
 def use_model(model_dir, img_dir):
@@ -159,15 +176,13 @@ def init_training():
 
     # Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
     x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0, 500)
-    x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, 1000)
+    x_data3, y_data3 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, 2000)
 
     # Load the data for training (https://www.kaggle.com/datasets/tawsifurrahman/tuberculosis-tb-chest-xray-dataset)
-    x_data4, y_data4 = utils.get_images('res/kaggle/Normal', img_width, img_height, True, 0, 1200)
+    x_data4, y_data4 = utils.get_images('res/kaggle/Normal', img_width, img_height, True, 0, 2200)
     x_data5, y_data5 = utils.get_images('res/kaggle/Tuberculosis', img_width, img_height, True, 1, 700)
 
     # concatenate the data
-    # x_data = np.concatenate((x_data2, x_data3, x_data4, x_data5))
-    # y_data = np.concatenate((y_data2, y_data3, y_data4, y_data5))
     x_data = np.concatenate((x_data, x_data2, x_data3, x_data4, x_data5))
     y_data = np.concatenate((y_data, y_data2, y_data3, y_data4, y_data5))
 
@@ -178,7 +193,7 @@ def init_training():
     y_data = y_data[indices]
 
     # Training
-    train_model('models2/tuberculosis_model.keras', x_data, y_data)
+    train_model('models/tuberculosis_model.keras', x_data, y_data)
 
 
 '''
@@ -209,25 +224,17 @@ def init_training():
         layers.Dense(1, activation='sigmoid')
     ])
     
-    epochs: 10
-    test accuracy: 0.78125
-    test loss: 0.43204355239868164
+    # epochs: 10
+    # test accuracy: 0.78125
+    # test loss: 0.43204355239868164
     
-    epochs: 15
-    test accuracy: 0.7916666865348816
-    test loss: 0.40296903252601624
+    epochs: 15 <= current
+    test accuracy: 0.8958333134651184
+    test loss: 0.230385422706604
     
-    epochs: 15, dropout: 0.4
-    test accuracy: 0.8229166865348816
-    test loss: 0.3683129847049713
-    
-    epochs: 15, dropout: 0.5 <- current model in models2 folder
-    test accuracy: 0.84375
-    test loss: 0.28646957874298096
-    
-    epochs: 20
-    test accuracy: 0.8333333134651184
-    test loss: 0.43296095728874207
+    # epochs: 20
+    # test accuracy: 0.8333333134651184
+    # test loss: 0.43296095728874207
     
     
 ******************************************************************************************************************
@@ -237,7 +244,7 @@ print("GPUs Available: ", tf.config.list_physical_devices('GPU'))
 print("tensorflow version :: ", tf.__version__)
 img_height = 128
 img_width = 128
-epochs = 15
+epochs = 20
 class_names = ['healthy lung', 'tuberculosis lung']
 
 # TRAINING
@@ -245,11 +252,14 @@ class_names = ['healthy lung', 'tuberculosis lung']
 
 # Load the data for testing (datasetninja test data, mendeley unused TB data, kaggle unused healthy data)
 # x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
-# x_test, y_test = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, skip=1000)
-# x_test, y_test = utils.get_images('res/kaggle/Normal', img_width, img_height, True, 0, skip=1500)
+
+x_test2, y_test2 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, skip=2000)
+x_test3, y_test3 = utils.get_images('res/kaggle/Normal', img_width, img_height, True, 0, skip=3000)
+x_test = np.concatenate((x_test2, x_test3))
+y_test = np.concatenate((y_test2, y_test3))
 
 # Testing
-# test_model('models/tuberculosis_model.keras', x_test, y_test)
+test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
 # use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
