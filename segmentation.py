@@ -92,7 +92,7 @@ def segmentation(img_path, size):
             if lung_mask[i][j] == 0:
                 img[i][j] = 0
 
-    cv.imshow('img', img)
-    cv.waitKey()
-    cv.destroyAllWindows()
+    # cv.imshow('img', img)
+    # cv.waitKey()
+    # cv.destroyAllWindows()
     return lung_mask,img
