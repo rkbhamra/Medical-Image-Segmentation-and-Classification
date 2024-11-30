@@ -253,13 +253,13 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # Load the data for testing (datasetninja test data, mendeley unused TB data, kaggle unused healthy data)
 # x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
 
-x_test2, y_test2 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, skip=2000)
-x_test3, y_test3 = utils.get_images('res/kaggle/Normal', img_width, img_height, True, 0, skip=3000)
-x_test = np.concatenate((x_test2, x_test3))
-y_test = np.concatenate((y_test2, y_test3))
+# x_test2, y_test2 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, skip=2000)
+# x_test3, y_test3 = utils.get_images('res/kaggle/Normal', img_width, img_height, True, 0, skip=3000)
+# x_test = np.concatenate((x_test2, x_test3))
+# y_test = np.concatenate((y_test2, y_test3))
 
-# Testing
-test_model('models/tuberculosis_model.keras', x_test, y_test)
+# # Testing
+# test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
 # use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
