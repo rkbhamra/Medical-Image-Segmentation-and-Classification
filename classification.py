@@ -64,7 +64,7 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
         )
 
         model.summary()
-        history = model.fit(train_generator, epochs=10, validation_data=validation_generator, verbose=1)
+        history = model.fit(train_generator, epochs=10, validation_data=validation_generator, verbose=0)
 
         model.save(model_dir)
         with open(f'{model_dir}_history.json', 'w') as f:
@@ -125,7 +125,7 @@ def use_model(model_dir, img_dir):
     print(f'accuracy :: {acc * 100:.2f}%')
     print(class_names[index])
 
-    ui_img = utils.get_ui_output(img_dir, img_width, img_height, index)
+    ui_img = utils.get_ui_output(img_dir, 512, 512, index)
     # draw_images(np.array([ui_img]), [index])
 
     return [class_names[index], acc, ui_img]
@@ -133,7 +133,7 @@ def use_model(model_dir, img_dir):
 
 def init_training():
     # Load the data for training (https://datasetninja.com/chest-xray)
-    x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
+    x_data, y_data = utils.get_images('res/example_data/img', img_width, img_height)
 
     # Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
     x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0, 500)
@@ -176,17 +176,17 @@ img_width = 128
 class_names = ['healthy lung', 'tuberculosis lung']
 
 # TRAINING
-init_training()
+# init_training()
 
 # Load the data for testing
 # x_test, y_test = utils.get_images('res/example_data/img', img_width, img_height)
-x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
+# x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
 
 # Testing
-test_model('models/tuberculosis_model.keras', x_test, y_test)
+# test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
-use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
-use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
+# use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
+# use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
 
-load_model_history('models/tuberculosis_model')
+# load_model_history('models/tuberculosis_model')
