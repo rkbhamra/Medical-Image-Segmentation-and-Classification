@@ -66,7 +66,8 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
         )
 
         model.summary()
-        history = model.fit(train_generator, epochs=epochs, validation_data=validation_generator, verbose=1)
+
+        history = model.fit(train_generator, epochs=epochs, validation_data=validation_generator, verbose=0)
 
         model.save(model_dir)
         with open(f'{model_dir}_history.json', 'w') as f:
@@ -142,8 +143,8 @@ def use_model(model_dir, img_dir):
     print(f'accuracy :: {acc * 100:.2f}%')
     print(class_names[index])
 
-    ui_img = utils.get_ui_output(img_dir, img_width, img_height, index)
-    draw_images(np.array([ui_img]), [index])
+    ui_img = utils.get_ui_output(img_dir, 512, 512, index)
+    # draw_images(np.array([ui_img]), [index])
 
     return [class_names[index], acc, ui_img]
 
@@ -171,7 +172,7 @@ def use_model_multi(model_dir, img_dirs):
 
 def init_training():
     # Load the data for training (https://datasetninja.com/chest-xray)
-    x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
+    x_data, y_data = utils.get_images('res/example_data/img', img_width, img_height)
 
     # Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
     x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0, 500)
@@ -232,7 +233,7 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # x_test = np.concatenate((x_test2, x_test3))
 # y_test = np.concatenate((y_test2, y_test3))
 
-# Testing
+# # Testing
 # test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model

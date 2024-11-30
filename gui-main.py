@@ -1,10 +1,13 @@
 import sys
 
+import PyQt6 as pqt
 import PyQt6.QtWidgets as q
 from PyQt6.QtGui import QPixmap, QPicture
 from PyQt6.QtWidgets import QApplication, QMainWindow
 import PyQt6.QtCore as qtc
-import PyQt6.QtMultimediaWidgets as qtg
+import PyQt6.QtGui as qtg
+import cv2
+import numpy as np
 
 from classification import use_model
 
@@ -63,6 +66,8 @@ class ImageUploadWindow(QMainWindow):
             """)
         self.accuracyText.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
         self.accuracyText.setGeometry(0, 638, winWidth, 40)
+
+        self.curImgSize = None
         
         # self.imageOutputBlock = q.QLabel(self)
         # self.imageOutputBlock.setGeometry(50, 380, imgWidth, imgHeight)
@@ -117,6 +122,8 @@ class ImageUploadWindow(QMainWindow):
                     background-color: rgba(127, 127, 127, 111);
                 }
             """)
+            print(imageInput.size())
+            self.curImgSize = (imageInput.width(), imageInput.height())
             # print(self.imagePlaceHolderTop.styleSheet())
             # self.imagePlaceHolderTop.update()
             # print(self.imagePlaceHolderTop.styleSheet())
@@ -177,8 +184,8 @@ class ImageUploadWindow(QMainWindow):
         if currentImage == "":
             return
         else:
-            lung_class, acc = use_model('models/tuberculosis_model.keras', currentImage)
-            # print(lung_class, acc)
+            lung_class, acc, mask = use_model('models/tuberculosis_model.keras', currentImage)
+            print(lung_class, acc, mask, mask.shape)
             lung_class = lung_class.split(" ")[0]
             lung_class = lung_class[0].upper() + lung_class[1:]
             # print(lung_class)
@@ -186,6 +193,32 @@ class ImageUploadWindow(QMainWindow):
             accStr = f'Accuracy: {acc * 100:.2f}%'
             # print(accStr)
             self.accuracyText.setText(accStr)
+            # print("B", mask.shape)
+            # cv2.imshow("BEFORE", mask)
+            # cv2.waitKey()
+            # mask = cv2.resize(mask, (self.imageInputBlock.width(), self.imageInputBlock.height()))
+            # # masked_img = masked_img.scaled(self.imageInputBlock.size())
+            # print("A", mask.shape)
+            # cv2.imshow("AFTER", mask)
+            # cv2.waitKey()
+            # mask = list(reversed(mask))
+            
+            imgH, imgW, _ = mask.shape
+            # mask2 = np.require(mask, np.uint8, 'C')
+            masked_img = qtg.QImage(mask.data, imgW, imgH, imgW * 3, qtg.QImage.Format.Format_RGB888)
+            # masked_img = QPixmap()
+            # mask2 = cv2.Mat
+            # masked_img.loadFromData(mask.data)
+            # masked_img.
+            mask_px = QPixmap(masked_img)
+            # mask_px.convertFromImage(masked_img)
+            # mask2 = int(mask * 256)
+            # mask_px.loadFromData(mask2.data)
+            # print(mask2)
+            # maskmap = mask_px.mask().
+            # print(mask_px.)
+            self.imageInputBlock.setPixmap(mask_px)#, qtc.Qt.AspectRatioMode.IgnoreAspectRatio))
+            # self.imageInputBlock.setObjectName(masked_img[0])
             # if currentImage[-5] == '2':
             #     self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image.png")
             # else:
