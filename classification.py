@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras import layers, models, regularizers
-from tensorflow.keras.regularizers import l2
+from tensorflow.keras import layers, models
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 from sklearn.model_selection import StratifiedKFold
@@ -10,6 +9,8 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sns
 import json
 import utils
+
+import visualkeras
 
 
 def draw_images(images, labels):
@@ -67,7 +68,8 @@ def train_model(model_dir, x_data, y_data, k_folds=5):
         )
 
         model.summary()
-        history = model.fit(train_generator, epochs=epochs, validation_data=validation_generator, verbose=1)
+
+        history = model.fit(train_generator, epochs=epochs, validation_data=validation_generator, verbose=0)
 
         model.save(model_dir)
         with open(f'{model_dir}_history.json', 'w') as f:
@@ -143,8 +145,8 @@ def use_model(model_dir, img_dir):
     print(f'accuracy :: {acc * 100:.2f}%')
     print(class_names[index])
 
-    ui_img = utils.get_ui_output(img_dir, img_width, img_height, index)
-    draw_images(np.array([ui_img]), [index])
+    ui_img = utils.get_ui_output(img_dir, 512, 512, index)
+    # draw_images(np.array([ui_img]), [index])
 
     return [class_names[index], acc, ui_img]
 
@@ -172,7 +174,7 @@ def use_model_multi(model_dir, img_dirs):
 
 def init_training():
     # Load the data for training (https://datasetninja.com/chest-xray)
-    x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
+    x_data, y_data = utils.get_images('res/example_data/img', img_width, img_height)
 
     # Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
     x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0, 500)
@@ -208,34 +210,9 @@ def init_training():
     will need the following to use model:
     - models folder (contains .keras file) 
     
-    image size: 128x128
-    model = models.Sequential([
-        layers.Conv2D(16, (3, 3), activation='relu', input_shape=(img_width, img_height, 3)),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(32, (3, 3), activation='relu'),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(64, (3, 3), activation='relu'),
-        layers.MaxPooling2D((2, 2)),
-        layers.Conv2D(128, (3, 3), activation='relu'),
-        layers.MaxPooling2D((2, 2)),
-        layers.Flatten(),
-        layers.Dense(256, activation='relu'),
-        layers.Dropout(0.3),
-        layers.Dense(1, activation='sigmoid')
-    ])
-    
-    # epochs: 10
-    # test accuracy: 0.78125
-    # test loss: 0.43204355239868164
-    
-    epochs: 15 <= current
+    current:
     test accuracy: 0.8958333134651184
     test loss: 0.230385422706604
-    
-    # epochs: 20
-    # test accuracy: 0.8333333134651184
-    # test loss: 0.43296095728874207
-    
     
 ******************************************************************************************************************
 '''
@@ -244,7 +221,7 @@ print("GPUs Available: ", tf.config.list_physical_devices('GPU'))
 print("tensorflow version :: ", tf.__version__)
 img_height = 128
 img_width = 128
-epochs = 20
+epochs = 15
 class_names = ['healthy lung', 'tuberculosis lung']
 
 # TRAINING
@@ -253,18 +230,21 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # Load the data for testing (datasetninja test data, mendeley unused TB data, kaggle unused healthy data)
 # x_test, y_test = utils.get_images('res/test/img', img_width, img_height)
 
-x_test2, y_test2 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, skip=2000)
-x_test3, y_test3 = utils.get_images('res/kaggle/Normal', img_width, img_height, True, 0, skip=3000)
-x_test = np.concatenate((x_test2, x_test3))
-y_test = np.concatenate((y_test2, y_test3))
+# x_test2, y_test2 = utils.get_images('res/mendeley/TB', img_width, img_height, True, 1, skip=2000)
+# x_test3, y_test3 = utils.get_images('res/kaggle/Normal', img_width, img_height, True, 0, skip=3000)
+# x_test = np.concatenate((x_test2, x_test3))
+# y_test = np.concatenate((y_test2, y_test3))
 
-# Testing
-test_model('models/tuberculosis_model.keras', x_test, y_test)
+# # Testing
+# test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
 # use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
 # use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
 # use_model_multi('models/tuberculosis_model.keras', ['tb.jpg', 'lung.png', 'lung2.jpg'])
 
-# load_model_history('models/tuberculosis_model')
+# load_model_history('models/tuberculosis_model20')
 
+# visualize the model
+# model = tf.keras.models.load_model('models2/tuberculosis_model.keras')
+# visualkeras.layered_view(model, legend=True).show()
