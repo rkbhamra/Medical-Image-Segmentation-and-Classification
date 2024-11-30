@@ -10,6 +10,8 @@ import seaborn as sns
 import json
 import utils
 
+import visualkeras
+
 
 def draw_images(images, labels):
     plt.figure(figsize=(10, 10))
@@ -241,5 +243,8 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
 # use_model_multi('models/tuberculosis_model.keras', ['tb.jpg', 'lung.png', 'lung2.jpg'])
 
-load_model_history('models/tuberculosis_model20')
+# load_model_history('models/tuberculosis_model20')
 
+# visualize the model
+# model = tf.keras.models.load_model('models2/tuberculosis_model.keras')
+# visualkeras.layered_view(model, legend=True).show()
