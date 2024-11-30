@@ -22,6 +22,23 @@ imgWidth = 512
 imgHeight = 512
 imgSize = (512, 512)
 
+buttonCSS = """
+            QPushButton {
+                font-size: 18px;
+                background-color: #404040;
+                border-color: rgba(0, 0, 0, 0);
+            }
+            QPushButton:disabled {
+                background-color: #282828;
+                border-color: #202020;
+            }
+            QPushButton:hover {
+                border-radius: 6px;
+                background-color: %s;
+                border-color: #101010;
+            }
+        """
+
 class ImageUploadWindow(QMainWindow):
 
     def __init__(self):
@@ -56,7 +73,7 @@ class ImageUploadWindow(QMainWindow):
             }
             """)
         self.outputText.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
-        self.outputText.setGeometry(0, 610, winWidth, 40)
+        self.outputText.setGeometry(0, 614, winWidth, 40)
         
         self.accuracyText = q.QLabel("", self)
         self.accuracyText.setStyleSheet("""
@@ -65,7 +82,7 @@ class ImageUploadWindow(QMainWindow):
             }
             """)
         self.accuracyText.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
-        self.accuracyText.setGeometry(0, 638, winWidth, 40)
+        self.accuracyText.setGeometry(0, 642, winWidth, 40)
 
         self.curImgSize = None
         
@@ -79,9 +96,15 @@ class ImageUploadWindow(QMainWindow):
         # self.imagePlaceHolderBot = q.QPushButton("No Image Loaded Yet", self)
         # self.imagePlaceHolderBot.setGeometry(50, 380, imgWidth, imgHeight)
         # self.imagePlaceHolderBot.clicked.connect(self.saveImage)
+        self.imageExportBtn = q.QPushButton("Save Image", self)
+        self.imageExportBtn.setGeometry(410, 580, 130, 40)
+        self.imageExportBtn.setStyleSheet(buttonCSS % ("#60b0e0"))
+        self.imageExportBtn.setEnabled(False)
+        self.imageExportBtn.clicked.connect(self.saveImage)
 
         processButton = q.QPushButton("Go", self)
-        processButton.setGeometry(260, 580, 60, 30)
+        processButton.setGeometry(260, 580, 60, 40)
+        processButton.setStyleSheet(buttonCSS % ("#60e060"))
         processButton.clicked.connect(self.processImage)
         processButton.setToolTip("Run algorithm to check for tuberculosis\nNOTE: RIGHT NOW THIS SIMPLY PUTS THE OTHER IMAGE")
 
@@ -124,6 +147,7 @@ class ImageUploadWindow(QMainWindow):
             """)
             print(imageInput.size())
             self.curImgSize = (imageInput.width(), imageInput.height())
+            self.imageExportBtn.setEnabled(False)
             # print(self.imagePlaceHolderTop.styleSheet())
             # self.imagePlaceHolderTop.update()
             # print(self.imagePlaceHolderTop.styleSheet())
@@ -140,7 +164,7 @@ class ImageUploadWindow(QMainWindow):
         if fname[0]:
             # with open(fname, 'w') as f:
             #     f.write(self.imageOutputBlock.pixmap().toImage())
-            img = self.imageOutputBlock.grab(self.imageOutputBlock.rect())
+            img = self.imageInputBlock.grab(self.imageInputBlock.rect())
             print(img)
             # self.imageOutputBlock.render()
             img.save(fname[0])
@@ -217,7 +241,8 @@ class ImageUploadWindow(QMainWindow):
             # print(mask2)
             # maskmap = mask_px.mask().
             # print(mask_px.)
-            self.imageInputBlock.setPixmap(mask_px)#, qtc.Qt.AspectRatioMode.IgnoreAspectRatio))
+            self.imageInputBlock.setPixmap(mask_px.scaled(self.imageInputBlock.size()))#, qtc.Qt.AspectRatioMode.IgnoreAspectRatio))
+            self.imageExportBtn.setEnabled(True)
             # self.imageInputBlock.setObjectName(masked_img[0])
             # if currentImage[-5] == '2':
             #     self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image.png")

@@ -241,5 +241,5 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
 # use_model_multi('models/tuberculosis_model.keras', ['tb.jpg', 'lung.png', 'lung2.jpg'])
 
-load_model_history('models/tuberculosis_model20')
+# load_model_history('models/tuberculosis_model20')
 
