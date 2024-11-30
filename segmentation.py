@@ -1,8 +1,9 @@
 import numpy as np
 import cv2 as cv
 import os
+import matplotlib.pyplot as plt
 
-# major algo
+# Major algorithm
 def identify_lungs(binary_image):
     lung_image = np.zeros_like(binary_image)
     
@@ -36,7 +37,7 @@ def identify_lungs(binary_image):
 
 def segmentation(img_path, size):
     img = cv.imread(img_path, cv.IMREAD_GRAYSCALE)
-    height, width = img.shape
+    _, width = img.shape
 
     # white padding to the top
     white_padding = np.zeros((50, width))
@@ -45,46 +46,28 @@ def segmentation(img_path, size):
 
     # invert image colors (binary format with white as lung region)
     img = 255 - img
-    #if img.dtype != np.uint8:
-        #img = img.astype(np.uint8)
 
-    # Apply histogram equalization
-    #img = cv.equalizeHist(img)
-
-    img[img > 80] = 255  #please don't change the thresholds, it messes up the rest of the code
+    img[img > 80] = 255  # Keep this threshold unchanged
     img[img <= 80] = 0
 
     # black padding to the bottom
     black_padding = np.zeros((50, width))
     img = np.row_stack((black_padding, img))
 
-    # apply morphological closing to fill small holes
+    # Apply morphological closing to fill small holes
     kernel = np.ones((12, 12), np.uint8)
     closing = cv.morphologyEx(img, cv.MORPH_CLOSE, kernel)
     closing = np.uint8(closing)
 
-    #edges = cv.Canny(closing, 70, 200)
-
-
-
-
     lung_identified_image = cv.flip(identify_lungs(cv.flip(identify_lungs(cv.resize(closing,(size,size))),1)),1)
-
 
     contours, _ = cv.findContours(lung_identified_image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
-
     contours = sorted(contours, key=cv.contourArea, reverse=True)[:2]
-
 
     lung_mask = np.zeros_like(lung_identified_image)
 
-
     cv.drawContours(lung_mask, contours, -1, (255), thickness=cv.FILLED)
-    # output_dir = r'C:\Users\reetr\OneDrive\Desktop\CPS843\Medical-Image-Segmentation-and-Classification\output'
-    # cv.imwrite(f'{output_dir}/filled_lung_regions.png', lung_mask)
-
-    # img = cv.imread(img_path)
 
     img = cv.resize(img, (size, size))
     for i in range(lung_mask.shape[0]):
@@ -92,7 +75,27 @@ def segmentation(img_path, size):
             if lung_mask[i][j] == 0:
                 img[i][j] = 0
 
-    cv.imshow('img', img)
-    cv.waitKey()
-    cv.destroyAllWindows()
-    return lung_mask,img
+    return lung_mask, img
+
+def calculate_white_pixel_count(img_path):
+    lung_mask, _ = segmentation(img_path, 512)
+    white_pixel_count = np.sum(lung_mask == 255)  # Count white pixels (255)
+    return white_pixel_count
+
+if __name__ == '__main__':
+    white_pixel_counts = []  # List to store white pixel counts
+
+    for img in os.listdir(r'C:\Users\reetr\OneDrive\Desktop\Medical-Image-Segmentation-and-Classification\CXRpng-train\img'):
+        img_path = os.path.join(r'C:\Users\reetr\OneDrive\Desktop\Medical-Image-Segmentation-and-Classification\CXRpng-train\img', img)
+        white_pixel_count = calculate_white_pixel_count(img_path)
+        white_pixel_counts.append(white_pixel_count)
+        print(f'{img}: {white_pixel_count} white pixels')
+
+    # Plotting the frequency of the number of white pixels in the whole list
+    plt.figure(figsize=(10, 5))
+    plt.hist(white_pixel_counts, bins=20, edgecolor='black')
+    plt.title('Distribution of White Pixels in Lung Masks')
+    plt.xlabel('Number of White Pixels')
+    plt.ylabel('Frequency')
+    plt.grid(True)
+    plt.show()
