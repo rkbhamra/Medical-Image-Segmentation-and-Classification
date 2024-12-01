@@ -236,7 +236,7 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # y_test = np.concatenate((y_test2, y_test3))
 
 # # Testing
-# test_model('models2/tuberculosis_model.keras', x_test, y_test)
+# test_model('models/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
 # use_model('models2/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')

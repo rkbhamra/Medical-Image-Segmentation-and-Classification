@@ -280,7 +280,7 @@ class ImageUploadWindow(QMainWindow):
         if currentImage == "":
             return
         else:
-            lung_class, acc, mask = use_model('models/tuberculosis_model.keras', currentImage)
+            lung_class, acc, mask = use_model('models2/tuberculosis_model.keras', currentImage)
             print(lung_class, acc, mask, mask.shape)
             lung_class = lung_class.split(" ")[0]
             lung_class = lung_class[0].upper() + lung_class[1:]
