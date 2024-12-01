@@ -34,7 +34,7 @@ def get_images(img_path, w, h, ordered=False, c=0, limit=-1, skip=0):
             if i < skip:
                 continue
 
-            images.append(cv2.resize(cv2.imread(f'{img_path}/{f}'), (w, h)) / 255.0)
+            images.append(get_image(f'{img_path}/{f}', w, h))
             if ordered:
                 classes.append(c)
             else:
@@ -54,7 +54,10 @@ def get_images(img_path, w, h, ordered=False, c=0, limit=-1, skip=0):
 
 def get_image(img_path, w, h):
     # _, img = get_masked_lungs(img_path, 256)
-    # img = cv2.resize(img, (w, h)) / 255.0
+    # img = cv2.resize(img, (w, h))
+    # img = cv2.convertScaleAbs(img)
+    # img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+
     img = cv2.resize(cv2.imread(img_path), (w, h)) / 255.0
     return img
 
@@ -91,7 +94,6 @@ def get_ui_output(img_path, w, h, class_type):
     # cv2.destroyAllWindows()
 
     return cv2.addWeighted(img, 1, mask, 0.8, 0)#.astype(np.uint8)#ret
-
 
 
 
