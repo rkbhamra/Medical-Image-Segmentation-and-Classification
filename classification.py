@@ -174,7 +174,7 @@ def use_model_multi(model_dir, img_dirs):
 
 def init_training():
     # Load the data for training (https://datasetninja.com/chest-xray)
-    x_data, y_data = utils.get_images('res/example_data/img', img_width, img_height)
+    x_data, y_data = utils.get_images('res/train/img', img_width, img_height)
 
     # Load the data for training (https://data.mendeley.com/datasets/8j2g3csprk/2)
     x_data2, y_data2 = utils.get_images('res/mendeley/healthy', img_width, img_height, True, 0, 500)
@@ -236,14 +236,14 @@ class_names = ['healthy lung', 'tuberculosis lung']
 # y_test = np.concatenate((y_test2, y_test3))
 
 # # Testing
-# test_model('models/tuberculosis_model20S.keras', x_test, y_test)
+# test_model('models2/tuberculosis_model.keras', x_test, y_test)
 
 # Use model
-# use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
-# use_model('models/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
-# use_model_multi('models/tuberculosis_model.keras', ['tb.jpg', 'lung.png', 'lung2.jpg'])
+# use_model('models2/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0336_1.png')
+# use_model('models2/tuberculosis_model.keras', 'res/example_data/img/CHNCXR_0025_0.png')
+# use_model_multi('models2/tuberculosis_model.keras', ['tb.jpg', 'healthy.jpg', 'lung.jpg'])
 
-# load_model_history('models/tuberculosis_model')
+# load_model_history('models2/tuberculosis_model')
 
 # visualize the model
 # model = tf.keras.models.load_model('models2/tuberculosis_model.keras')
