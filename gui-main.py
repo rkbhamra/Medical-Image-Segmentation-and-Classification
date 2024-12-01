@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow
 import PyQt6.QtCore as qtc
 import PyQt6.QtGui as qtg
 import cv2
+import time
 import numpy as np
 
 from classification import use_model
@@ -53,6 +54,9 @@ class ImageUploadWindow(QMainWindow):
         # subWindow.setGeometry(50, 100, 40, 40)
         # titleTextHolder = q.QLabel(self)
         # titleTextHolder.setGeometry(0, 10, winWidth, 50)
+
+        self.contrastLevel = 0
+        self.outImage = None
 
         titleText = q.QLabel("Tuberculosis Detection Algorithm using X-Ray", self)
         titleText.setStyleSheet("""
@@ -102,6 +106,36 @@ class ImageUploadWindow(QMainWindow):
         self.imageExportBtn.setEnabled(False)
         self.imageExportBtn.clicked.connect(self.saveImage)
 
+        self.ctUp = q.QPushButton("+", self)
+        self.ctUp.setGeometry(130, 580, 40, 40)
+        self.ctUp.setStyleSheet(buttonCSS % ("#a0a0a0"))
+        self.ctUp.setEnabled(False)
+        self.ctUp.clicked.connect(lambda state, inc=True: self.contrast(inc))
+
+        self.ctText = q.QLabel("--", self)
+        self.ctText.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        self.ctText.setGeometry(80, 580, 50, 40)
+        self.ctText.setStyleSheet("""
+            QLabel {
+                font-size: 14pt;
+            }
+            """)
+        
+        self.ctDown = q.QPushButton("-", self)
+        self.ctDown.setGeometry(40, 580, 40, 40)
+        self.ctDown.setStyleSheet(buttonCSS % ("#a0a0a0"))
+        self.ctDown.setEnabled(False)
+        self.ctDown.clicked.connect(lambda state, inc=False: self.contrast(inc))
+
+        ctLabel = q.QLabel("Contrast", self)
+        ctLabel.setAlignment(qtc.Qt.AlignmentFlag.AlignCenter)
+        ctLabel.setGeometry(40, 610, 130, 40)
+        ctLabel.setStyleSheet("""
+            QLabel {
+                font-size: 12pt;
+            }
+            """)
+
         processButton = q.QPushButton("Go", self)
         processButton.setGeometry(260, 580, 60, 40)
         processButton.setStyleSheet(buttonCSS % ("#60e060"))
@@ -109,6 +143,76 @@ class ImageUploadWindow(QMainWindow):
         processButton.setToolTip("Run algorithm to check for tuberculosis\nNOTE: RIGHT NOW THIS SIMPLY PUTS THE OTHER IMAGE")
 
 
+    def formatContrast(self, c):
+        match (c):
+            case 0:
+                return "--"
+            case -10:
+                return "-1"
+            case 10:
+                return "+1"
+        # s = str(c)[-1]
+        s = str(abs(c))
+        print("STRING", s)
+        return ("+" if c > 0 else "-") + "0." + s
+
+
+    def contrast(self, up):
+        self.contrastLevel += (1 if up else -1)
+        if self.contrastLevel < -10:
+            self.contrastLevel = -10
+        elif self.contrastLevel > 10:
+            self.contrastLevel = 10
+        else:
+                # self.ctUp.setEnabled(False)
+                # self.ctDown.setEnabled(False)
+            ctLevel = self.contrastLevel / 10
+            self.ctText.setText(self.formatContrast(self.contrastLevel))
+            print(self.contrastLevel)
+            img = self.imageInputBlock.pixmap().toImage()
+            print(self.outImage.hasAlphaChannel(), img.hasAlphaChannel())
+            print("A")
+            imgStr = self.outImage.bits().asarray(512*512*4)
+            # imgStr.setsize(512 * 512 * 3)
+            # print(imgStr)
+            npImg = np.frombuffer(imgStr, dtype=np.uint8)
+            npImg.resize((512, 512, 4))
+            # print(npImg)
+            # npImg2 = np.fromfunction(self.doContrast, npImg) # * ctLevel 
+            tt = time.time()
+            # npImg2 = npImg.transpose((2, 0, 1)) # * ctLevel 
+            # npImg2 = np.copy(npImg)
+            # for i in range(512):
+            #     for j in range(512):
+            #         for k in range(3):
+            #             newNum = max(0, int(npImg[i][j][2 - k] * (ctLevel + 1) - (ctLevel * 127.5)))
+            #             npImg2[i][j][k] = min(255, newNum)
+            ctL2 = self.contrastLevel / 18 + 1
+            npImg2 = cv2.addWeighted(npImg, ctL2, npImg, 0, self.contrastLevel * -12.7)#2 ** (-0.7 * self.contrastLevel))
+            # npImg2 = min(255, max(0, int(npImg[:][:][:] * (ctLevel + 1) - (ctLevel * 127.5))))
+
+            # npImg2 = npImg2.transpose((1, 2, 0))
+            print(time.time() - tt)
+            # npImgbtw = (npImg * (ctLevel + 1))
+            # npImg2 = npImgbtw - (ctLevel * 127.5)
+            # npImg2[:][:][3] = 255
+            # npImg2 = npImg2.astype(np.uint8)
+
+            # npImg2 = min(255, max(0, npImgbtw))
+
+            # print(npImg[256][339], npImg2[256][339])
+            # print(npImg[256][340], npImg2[256][340])
+            
+            # cv2.imshow("IMG FROM BLOCK", npImg)
+            # cv2.imshow("IMG FROM BLOCK2", npImg2)
+            # cv2.waitKey()
+            npImg2 = cv2.cvtColor(npImg2, 5)
+            npQimg = qtg.QImage(npImg2.data, 512, 512, 512 * 4, qtg.QImage.Format.Format_RGBX8888)
+            print(npQimg.size(), npQimg.hasAlphaChannel())
+            npPix = QPixmap(npQimg)
+            self.imageInputBlock.setPixmap(npPix)
+            # self.ctUp.setEnabled(True)
+            # self.ctDown.setEnabled(True)
     
     def importImage(self):
         fname = q.QFileDialog.getOpenFileName(
@@ -148,6 +252,10 @@ class ImageUploadWindow(QMainWindow):
             print(imageInput.size())
             self.curImgSize = (imageInput.width(), imageInput.height())
             self.imageExportBtn.setEnabled(False)
+            self.ctUp.setEnabled(False)
+            self.ctDown.setEnabled(False)
+            self.ctText.setText("--")
+            self.contrastLevel = 0
             # print(self.imagePlaceHolderTop.styleSheet())
             # self.imagePlaceHolderTop.update()
             # print(self.imagePlaceHolderTop.styleSheet())
@@ -235,6 +343,7 @@ class ImageUploadWindow(QMainWindow):
             # masked_img.loadFromData(mask.data)
             # masked_img.
             mask_px = QPixmap(masked_img)
+            
             # mask_px.convertFromImage(masked_img)
             # mask2 = int(mask * 256)
             # mask_px.loadFromData(mask2.data)
@@ -243,6 +352,9 @@ class ImageUploadWindow(QMainWindow):
             # print(mask_px.)
             self.imageInputBlock.setPixmap(mask_px.scaled(self.imageInputBlock.size()))#, qtc.Qt.AspectRatioMode.IgnoreAspectRatio))
             self.imageExportBtn.setEnabled(True)
+            self.ctUp.setEnabled(True)
+            self.ctDown.setEnabled(True)
+            self.outImage = self.imageInputBlock.pixmap().toImage()
             # self.imageInputBlock.setObjectName(masked_img[0])
             # if currentImage[-5] == '2':
             #     self.exportImage("C:/Users/nicho/source/repos/Medical-Image-Segmentation-and-Classification/InputImages/sample_image.png")
