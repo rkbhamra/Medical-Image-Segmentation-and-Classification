@@ -151,7 +151,6 @@ class ImageUploadWindow(QMainWindow):
                 return "-1"
             case 10:
                 return "+1"
-        # s = str(c)[-1]
         s = str(abs(c))
         print("STRING", s)
         return ("+" if c > 0 else "-") + "0." + s
@@ -164,55 +163,20 @@ class ImageUploadWindow(QMainWindow):
         elif self.contrastLevel > 10:
             self.contrastLevel = 10
         else:
-                # self.ctUp.setEnabled(False)
-                # self.ctDown.setEnabled(False)
-            ctLevel = self.contrastLevel / 10
-            self.ctText.setText(self.formatContrast(self.contrastLevel))
-            print(self.contrastLevel)
-            img = self.imageInputBlock.pixmap().toImage()
-            print(self.outImage.hasAlphaChannel(), img.hasAlphaChannel())
-            print("A")
             imgStr = self.outImage.bits().asarray(512*512*4)
-            # imgStr.setsize(512 * 512 * 3)
-            # print(imgStr)
             npImg = np.frombuffer(imgStr, dtype=np.uint8)
             npImg.resize((512, 512, 4))
-            # print(npImg)
-            # npImg2 = np.fromfunction(self.doContrast, npImg) # * ctLevel 
-            tt = time.time()
-            # npImg2 = npImg.transpose((2, 0, 1)) # * ctLevel 
-            # npImg2 = np.copy(npImg)
-            # for i in range(512):
-            #     for j in range(512):
-            #         for k in range(3):
-            #             newNum = max(0, int(npImg[i][j][2 - k] * (ctLevel + 1) - (ctLevel * 127.5)))
-            #             npImg2[i][j][k] = min(255, newNum)
-            ctL2 = self.contrastLevel / 18 + 1
-            npImg2 = cv2.addWeighted(npImg, ctL2, npImg, 0, self.contrastLevel * -12.7)#2 ** (-0.7 * self.contrastLevel))
-            # npImg2 = min(255, max(0, int(npImg[:][:][:] * (ctLevel + 1) - (ctLevel * 127.5))))
 
-            # npImg2 = npImg2.transpose((1, 2, 0))
-            print(time.time() - tt)
-            # npImgbtw = (npImg * (ctLevel + 1))
-            # npImg2 = npImgbtw - (ctLevel * 127.5)
-            # npImg2[:][:][3] = 255
-            # npImg2 = npImg2.astype(np.uint8)
+            ctLevel = self.contrastLevel / 18 + 1
+            npImg = cv2.addWeighted(npImg, ctLevel, npImg, 0, self.contrastLevel * -12.7)
+            npImg = cv2.cvtColor(npImg, 5)
 
-            # npImg2 = min(255, max(0, npImgbtw))
-
-            # print(npImg[256][339], npImg2[256][339])
-            # print(npImg[256][340], npImg2[256][340])
-            
-            # cv2.imshow("IMG FROM BLOCK", npImg)
-            # cv2.imshow("IMG FROM BLOCK2", npImg2)
-            # cv2.waitKey()
-            npImg2 = cv2.cvtColor(npImg2, 5)
-            npQimg = qtg.QImage(npImg2.data, 512, 512, 512 * 4, qtg.QImage.Format.Format_RGBX8888)
+            npQimg = qtg.QImage(npImg.data, 512, 512, 512 * 4, qtg.QImage.Format.Format_RGBX8888)
             print(npQimg.size(), npQimg.hasAlphaChannel())
             npPix = QPixmap(npQimg)
             self.imageInputBlock.setPixmap(npPix)
-            # self.ctUp.setEnabled(True)
-            # self.ctDown.setEnabled(True)
+
+            self.ctText.setText(self.formatContrast(self.contrastLevel))
     
     def importImage(self):
         fname = q.QFileDialog.getOpenFileName(
